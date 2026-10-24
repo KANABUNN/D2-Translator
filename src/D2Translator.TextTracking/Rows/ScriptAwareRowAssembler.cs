@@ -27,12 +27,17 @@ public static class ScriptAwareRowAssembler
     /// <summary>隣り合う語の隙間が行の高さのこの割合を超えたら空白を入れる。</summary>
     private const double SpaceGapRatio = 0.25;
 
+    /// <summary>自分の発言の行頭の目印。この後ろには区切り記号と本文しか来ない。</summary>
+    private const string AddressMarker = "宛て";
+
     public static IReadOnlyList<OcrLine> Assemble(IReadOnlyList<OcrLine> latinLines, IReadOnlyList<OcrLine> cjkLines)
     {
         ArgumentNullException.ThrowIfNull(latinLines);
         ArgumentNullException.ThrowIfNull(cjkLines);
 
         List<Token> spans = BuildCjkSpans(cjkLines, out List<Token> cjkLatinWords);
+        // 英語 OCR がはっきりした英単語として読んだ所を、日本語 OCR が短い漢字等に誤読した場合（例: left → 厄仕）は英語の読みを使う
+        spans.RemoveAll(span => IsMisreadLatin(span, latinLines));
         var tokens = new List<Token>(spans);
 
         int lineId = 0;
@@ -105,9 +110,11 @@ public static class ScriptAwareRowAssembler
             int start = -1;
             for (int i = 0; i <= words.Count; i++)
             {
-                // 行頭の表示は : で終わる。その後ろの本文の誤読（例: I' → ド）を行頭の範囲につなげない
+                // 行頭の表示は : で終わる。その後ろの本文の誤読（例: I' → ド）を行頭の範囲につなげない。
+                // コロンが読めず「宛て」の直後に本文の誤読が続く場合（例: : I → コ）も、「宛て」の後は区切り記号だけをつなげる
                 bool continues = i < words.Count && inSpan[i] &&
-                    (start < 0 || (Gap(words[i - 1].Bounds, words[i].Bounds) <= lineHeight && !EndsWithColon(words[i - 1].Text)));
+                    (start < 0 || (Gap(words[i - 1].Bounds, words[i].Bounds) <= lineHeight && !EndsWithColon(words[i - 1].Text) &&
+                        !(EndsWithAddressMarker(words, start, i) && !IsSeparator(words[i].Text))));
                 if (continues && start < 0)
                 {
                     start = i;
@@ -268,6 +275,29 @@ public static class ScriptAwareRowAssembler
     }
 
     private static bool EndsWithColon(string text) => text.Length > 0 && text[^1] is ':' or '：';
+
+    private static bool EndsWithAddressMarker(IReadOnlyList<OcrWord> words, int start, int end) =>
+        string.Concat(words.Skip(start).Take(end - start).Select(w => w.Text)).EndsWith(AddressMarker, StringComparison.Ordinal);
+
+    private static bool IsSeparator(string text) => text.Length > 0 && text.All(c => c is ':' or '：' or ';' or '•' or '·' or '・' or '.' or '。');
+
+    /// <summary>
+    /// 日本語の範囲が、英語 OCR の読んだ英単語の誤読か。英語 OCR は日本語を記号の混じった短い列にしか読まないため、
+    /// 同じ位置をほぼ覆う英字だけの語が、かな・漢字の 2 倍以上の文字数あれば英語とみなす。
+    /// </summary>
+    private static bool IsMisreadLatin(Token span, IReadOnlyList<OcrLine> latinLines)
+    {
+        List<OcrWord> words = [.. latinLines.SelectMany(l => l.Words)
+            .Where(w => SameRow(w.Bounds, span.Bounds) && HorizontalOverlap(w.Bounds, span.Bounds) > 0)];
+        if (words.Count == 0 || !words.All(w => w.Text.All(c => char.IsAsciiLetter(c) || c is '\'' or '-')))
+        {
+            return false;
+        }
+
+        int covered = words.Sum(w => HorizontalOverlap(w.Bounds, span.Bounds));
+        int letters = words.Sum(w => w.Text.Count(char.IsAsciiLetter));
+        return covered >= 0.8 * span.Bounds.Width && letters >= 2 * TextUtil.CountCjkLetters(span.Text);
+    }
 
     private static bool IsAttachable(string text) =>
         text.Length > 0 && text.All(c => AttachablePunctuation.Contains(c) || TextUtil.IsCjk(c) || char.IsPunctuation(c));

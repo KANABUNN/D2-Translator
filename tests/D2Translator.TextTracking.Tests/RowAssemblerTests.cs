@@ -109,6 +109,36 @@ public class RowAssemblerTests
     }
 
     [Fact]
+    public void Short_kanji_misread_of_an_english_word_uses_the_english_reading()
+    {
+        // 日本語 OCR が left を「厄」「仕」と読んだ場合（Phase 5 の耐久試験、拡大率 100% の小さな文字）
+        OcrLine cjk = Line(Word("the", 277, 25), Word("厄", 308, 11), Word("仕", 320, 11), Word("33", 337, 16));
+        OcrLine latin = Line(Word("the", 277, 24), Word("left", 308, 23), Word("33", 337, 16));
+
+        Assert.Equal("the left 33", Assert.Single(ScriptAwareRowAssembler.Assemble([latin], [cjk])).Text);
+    }
+
+    [Fact]
+    public void Japanese_word_is_kept_when_the_english_reading_is_short_garbage()
+    {
+        OcrLine cjk = Line([.. Chars("[クラン]宛て:", 10), .. Chars("了解", 172)]);
+        OcrLine latin = Line(Word("{7c", 12, 100), Word("TR", 172, 38));
+
+        Assert.Equal("[クラン]宛て:了解", Assert.Single(ScriptAwareRowAssembler.Assemble([latin], [cjk])).Text);
+    }
+
+    [Fact]
+    public void Colon_and_letter_misread_as_kana_after_the_address_marker_are_not_joined()
+    {
+        // 「宛て: I」のコロンと I が「コ」1 文字に読まれた場合。「宛て」の後は区切り記号だけをつなげる
+        // 12 文字の行頭は x=10〜248。「コ」は直後の 250〜260 で、英語 OCR の I（258〜260）と重なる
+        OcrLine cjk = Line([.. Chars("[ファイアチーム]宛て", 10), Word("コ", 250, 10), Word("will", 267, 23)]);
+        OcrLine latin = Line(Word("I", 258, 2), Word("will", 267, 23));
+
+        Assert.Equal("[ファイアチーム]宛て I will", Assert.Single(ScriptAwareRowAssembler.Assemble([latin], [cjk])).Text);
+    }
+
+    [Fact]
     public void Japanese_body_after_the_prefix_is_kept()
     {
         OcrLine cjk = Line([.. Chars("[クラン]宛て:", 10), .. Chars("よろしく", 172)]);

@@ -55,20 +55,22 @@ public class DiagnosticsSummaryTests
     public void Cpu_window_memory_growth_and_unhandled_exceptions_are_reported()
     {
         var entries = new List<DiagnosticsEntry> { At(TimeSpan.Zero, new DiagnosticsEvent(DiagnosticsKinds.Lifecycle, "app_start")) };
-        for (int minute = 1; minute <= 30; minute++)
+        for (int minute = 1; minute <= 60; minute++)
         {
-            // 最初の 10 分だけ CPU が高く、ウォームアップ後にメモリが 40MB 増える
-            entries.Add(At(TimeSpan.FromMinutes(minute), Resources(minute <= 10 ? 8 : 2, minute < 15 ? 200 : 200 + (minute - 15) * 2)));
+            // 最初の 10 分だけ CPU が高い。ウォームアップ後はメモリが 1 分に 0.5MB 増え、7 分ごとに GC 前の一時的な山（+80MB）がある
+            double memory = minute < 15 ? 200 : 200 + (minute - 15) * 0.5;
+            entries.Add(At(TimeSpan.FromMinutes(minute), Resources(minute <= 10 ? 8 : 2, minute % 7 == 0 ? memory + 80 : memory)));
         }
 
         entries.Add(At(TimeSpan.FromMinutes(20), ExceptionInfo.Unhandled("dispatcher", new InvalidOperationException("secret body text"))));
 
         SessionSummary summary = Assert.Single(DiagnosticsSummary.Summarize(entries));
 
-        Assert.Equal(30, summary.Resources.Samples);
+        Assert.Equal(60, summary.Resources.Samples);
         Assert.Equal(8, summary.Resources.MaxCpu10MinAverage);
-        Assert.Equal(230, summary.Resources.MaxPrivateMb);
-        Assert.Equal(30, summary.Resources.MemoryGrowthAfterWarmupMb);
+        Assert.Equal(300.5, summary.Resources.MaxPrivateMb);
+        // 15〜29 分の中央値 204、46〜60 分の中央値 219.5。一時的な山は増加に数えない
+        Assert.Equal(15.5, summary.Resources.MemoryGrowthAfterWarmupMb);
         Assert.Equal(1, summary.Resources.UnhandledExceptions);
     }
 

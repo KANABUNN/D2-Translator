@@ -4,7 +4,10 @@ namespace D2Translator.Application.Diagnostics;
 public sealed record LatencyStats(string Metric, string Variant, int Count, double P50, double P95, double Max);
 
 /// <param name="MaxCpu10MinAverage">10 分間の平均 CPU（マシン全体比、%）の最大値。10 分に満たなければ null。</param>
-/// <param name="MemoryGrowthAfterWarmupMb">ウォームアップ後の Private Bytes の増加（最大値 − ウォームアップ終了時）。</param>
+/// <param name="MemoryGrowthAfterWarmupMb">
+/// ウォームアップ後の Private Bytes の増加。最後の 15 分の中央値 − ウォームアップ直後の 15 分の中央値。
+/// ガベージコレクションによる一時的な山を増加に数えない。45 分に満たなければ null。
+/// </param>
 public sealed record ResourceStats(
     int Samples,
     double? AverageCpu,
@@ -52,6 +55,9 @@ public static class DiagnosticsSummary
     public static readonly TimeSpan Warmup = TimeSpan.FromMinutes(15);
 
     public static readonly TimeSpan CpuWindow = TimeSpan.FromMinutes(10);
+
+    /// <summary>メモリの水準をとる区間の長さ。この区間の中央値どうしを比べる。</summary>
+    public static readonly TimeSpan MemoryWindow = TimeSpan.FromMinutes(15);
 
     public static IReadOnlyList<SessionSummary> Summarize(IEnumerable<DiagnosticsEntry> entries)
     {
@@ -125,10 +131,15 @@ public static class DiagnosticsSummary
             .Where(s => s.Event.Values.ContainsKey("private_mb"))
             .Select(s => (s.Time, s.Event.Values["private_mb"]))];
         double? growth = null;
-        int baseline = memory.FindIndex(m => m.Time - origin >= Warmup);
-        if (baseline >= 0)
+        if (memory.Count > 0 && memory[^1].Time - origin >= Warmup + MemoryWindow * 2)
         {
-            growth = memory.Skip(baseline).Max(m => m.Mb) - memory[baseline].Mb;
+            DateTimeOffset end = memory[^1].Time;
+            double[] early = [.. memory.Where(m => m.Time - origin >= Warmup && m.Time - origin < Warmup + MemoryWindow).Select(m => m.Mb).Order()];
+            double[] late = [.. memory.Where(m => m.Time > end - MemoryWindow).Select(m => m.Mb).Order()];
+            if (early.Length > 0 && late.Length > 0)
+            {
+                growth = Percentile(late, 0.5) - Percentile(early, 0.5);
+            }
         }
 
         return new ResourceStats(

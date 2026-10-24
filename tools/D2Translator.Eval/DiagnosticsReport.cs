@@ -100,7 +100,7 @@ internal static class DiagnosticsReport
         md.AppendLine(Row("P10 CPU（10 分平均の最大、マシン全体比）", r.MaxCpu10MinAverage, "%", "5% 以下", 5, true));
         md.AppendLine(Row("P11 Private Bytes（最大）", r.MaxPrivateMb, "MB", "500 MB 以下", 500, true));
         md.AppendLine(Row("P11 アプリ由来の GPU メモリ（最大）", r.MaxGpuMb, "MB", "256 MB 以下", 256, true));
-        md.AppendLine(Row("P13 ウォームアップ後のメモリ増加", r.MemoryGrowthAfterWarmupMb, "MB", "100 MB 以下（8 時間）", 100, longEnough));
+        md.AppendLine(Row("P13 ウォームアップ後のメモリ増加（最後と直後の 15 分の中央値の差）", r.MemoryGrowthAfterWarmupMb, "MB", "100 MB 以下（8 時間）", 100, longEnough));
         md.AppendLine(CultureInfo.InvariantCulture,
             $"| P13 未処理例外 | {r.UnhandledExceptions} 件 | 0 件（8 時間） | {(r.UnhandledExceptions > 0 ? "不合格" : longEnough ? "合格" : "参考（8 時間未満）")} |");
         md.AppendLine(CultureInfo.InvariantCulture, $"| 稼働時間 | {s.Duration.TotalHours:0.00} 時間 | 8 時間 | {(longEnough ? "達成" : "未達")} |");

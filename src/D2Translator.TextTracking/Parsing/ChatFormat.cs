@@ -64,10 +64,10 @@ public sealed class ChatFormat
     public static ChatFormat JapaneseClient { get; } = new()
     {
         // 括弧は OCR で落ちやすいため省略を許す。チャンネル名は日本語を含むものに限る。
-        // 「宛て」の後のコロンは、他プレイヤーの発言と同じく . や ・ 等への誤読も受け付ける
+        // 「宛て」の後のコロンは、他プレイヤーの発言と同じく . や ・ 等への誤読も、読み落としも受け付ける
         OwnMessagePatterns =
         [
-            Pattern(@"^\[?(?<label>[^\[\]:]{0,30}?" + JapaneseLetter + @"[^\[\]:]{0,30}?)\]?\s*宛て\s*[:;•·・.。]{1,3}\s*(?<body>.*)$"),
+            Pattern(@"^\[?(?<label>[^\[\]:]{0,30}?" + JapaneseLetter + @"[^\[\]:]{0,30}?)\]?\s*宛て\s*[:;•·・.。]{0,3}\s*(?<body>.*)$"),
             Pattern(@"^To\s*\[?(?<label>[^\[\]:]{0,30}?" + JapaneseLetter + @"[^\[\]:]{0,30}?)\]?\s*:\s*(?<body>.*)$"),
         ],
         PlayerMessagePatterns =
