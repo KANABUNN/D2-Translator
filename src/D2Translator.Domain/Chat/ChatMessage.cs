@@ -88,6 +88,12 @@ public sealed record ChatMessage
 
     public string Text => CorrectedText ?? RawText;
 
+    /// <summary>
+    /// 会話（自分と他プレイヤーの発言）か。システム表示と、ROI に入ったチャット以外の画面表示は
+    /// System として追跡には使うが、受信履歴と翻訳の対象にしない（決定 D18）。
+    /// </summary>
+    public bool IsConversation => Kind != ChatLineKind.System;
+
     /// <summary>画面上の取得時刻。ゲームの発信時刻ではない。</summary>
     public required DateTimeOffset ObservedAt { get; init; }
 

@@ -27,6 +27,7 @@ public sealed partial class MainViewModel : ObservableObject
     private const int MaxHistory = 1000;
 
     private readonly Dictionary<Guid, MessageItem> _messageIndex = [];
+    private int _hiddenCount;
     private readonly CaptureController _controller;
     private readonly SettingsRepository _settingsRepository;
     private readonly CaptureProfileRepository _profiles;
@@ -68,6 +69,7 @@ public sealed partial class MainViewModel : ObservableObject
         Notice = string.Empty;
         WaitingText = string.Empty;
         LastObservationText = string.Empty;
+        HiddenText = string.Empty;
         StatsText = "まだフレームを処理していません。";
         DataFolder = location.RootDirectory;
         PackageText = location.IsPackaged ? "あり（MSIX）" : "なし（開発実行。OCR の正式サポート条件外）";
@@ -149,6 +151,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     public partial string LastObservationText { get; set; }
+
+    [ObservableProperty]
+    public partial string HiddenText { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SelectTargetCommand), nameof(CalibrateCommand), nameof(StartCommand), nameof(StopCommand))]
@@ -340,6 +345,18 @@ public sealed partial class MainViewModel : ObservableObject
     private void ApplyUpdate(ChatFeedUpdate update)
     {
         Guid id = update.Message.MessageId;
+        if (!update.Message.IsConversation)
+        {
+            // システム表示とチャット以外の画面表示は履歴に出さず、件数だけを診断に示す
+            if (update.Kind == MessageUpdateKind.Added)
+            {
+                _hiddenCount++;
+                HiddenText = $"履歴に表示しなかったシステム表示・画面表示: {_hiddenCount} 件";
+            }
+
+            return;
+        }
+
         if (update.Kind == MessageUpdateKind.Removed)
         {
             if (_messageIndex.Remove(id, out MessageItem? removed))

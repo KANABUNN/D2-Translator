@@ -160,7 +160,7 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
         {
             ChatLineKind.Own => $"自分 → {candidate.ChannelLabel}",
             ChatLineKind.Player => candidate.Speaker ?? "不明",
-            _ => "システム",
+            _ => "システム（履歴には表示しない）",
         };
         return $"{who}{(candidate.IsUncertain ? "（要確認）" : string.Empty)}: {candidate.Body}";
     }

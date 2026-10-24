@@ -68,7 +68,7 @@
       <DockPanel Grid.Column="0">
         <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionHeader}" Text="受信履歴" />
         <TextBlock DockPanel.Dock="Bottom" Margin="0,6,0,0" TextWrapping="Wrap" Style="{StaticResource StatusLabel}"
-                   Text="翻訳は Phase 3 で実装します。現在は原文と、D2 辞書・話者名の注釈だけを表示します。" />
+                   Text="翻訳は Phase 3 で実装します。現在は会話の原文と、D2 辞書・話者名の注釈だけを表示します。参加通知などのシステム表示は表示しません。" />
         <ListBox x:Name="MessageList" ItemsSource="{Binding Messages}" AutomationProperties.Name="受信履歴"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
           <ListBox.ItemTemplate>
@@ -84,18 +84,7 @@
                     <TextBlock Text="{Binding Header}" FontWeight="SemiBold" Margin="0,0,10,0" />
                     <TextBlock Text="{Binding Status}" Style="{StaticResource StatusLabel}" />
                   </WrapPanel>
-                  <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15">
-                    <TextBlock.Style>
-                      <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding IsSystem}" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
-                            <Setter Property="FontSize" Value="13" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </TextBlock.Style>
-                  </TextBlock>
+                  <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15" />
                   <TextBlock Text="{Binding Annotations}" TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0"
                              Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}">
                     <TextBlock.Style>
@@ -118,7 +107,8 @@
       <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
         <StackPanel>
           <TextBlock Style="{StaticResource SectionHeader}" Text="診断" />
-          <TextBlock Text="{Binding StatsText}" TextWrapping="Wrap" Margin="0,0,0,12" />
+          <TextBlock Text="{Binding StatsText}" TextWrapping="Wrap" Margin="0,0,0,4" />
+          <TextBlock Text="{Binding HiddenText}" TextWrapping="Wrap" Margin="0,0,0,12" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="最新の観測（組み立てた行）" />
           <TextBlock Text="{Binding LastObservationText}" TextWrapping="Wrap" FontSize="11" Style="{StaticResource StatusLabel}" />
           <ItemsControl ItemsSource="{Binding Lines}" Margin="0,2,0,12" AutomationProperties.Name="最新の観測">
