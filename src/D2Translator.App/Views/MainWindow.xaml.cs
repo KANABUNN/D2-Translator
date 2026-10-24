@@ -148,6 +148,8 @@ public partial class MainWindow : Window
         _overlay?.Close();
         _hotkeys?.Dispose();
         _foreground?.Dispose();
-        Close();
+        // 取得していなければ停止は同期的に終わり、まだ閉じる処理の中にいる。
+        // その中で Close を呼ぶと InvalidOperationException になるため、閉じる処理を抜けてから閉じ直す
+        _ = Dispatcher.InvokeAsync(Close);
     }
 }

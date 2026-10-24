@@ -101,6 +101,45 @@ public class WgcCaptureTests
     }
 
     [Fact]
+    public async Task Resizing_target_window_keeps_capturing_at_the_new_size()
+    {
+        SkipUnlessInteractive();
+        CancellationToken ct = TestContext.Current.CancellationToken;
+
+        using TestWindowHost window = await TestWindowHost.ShowAsync(TopText, BottomText);
+        // アプリと同じく、取得対象は UI スレッド（メッセージループあり）で作る
+        using WgcCaptureTarget target = window.Invoke(() => WgcCaptureTarget.CreateForWindow(window.Hwnd, TimeProvider.System));
+        await using ICaptureSource source = target.CreateSource();
+        PixelSize initial = target.CurrentSize;
+        var request = new CaptureRequest(new CaptureProfile { Id = Guid.NewGuid(), Roi = NormalizedRect.Full, FrameSize = initial }, 10);
+
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TimeSpan.FromSeconds(10));
+        PixelSize? resized = null;
+        bool requested = false;
+        await foreach (RoiFrame frame in source.CaptureAsync(request, timeout.Token))
+        {
+            using (frame)
+            {
+                if (!requested)
+                {
+                    // ゲームの解像度やウィンドウの大きさを変えた場合に当たる。フレームプールの作り直しで止まらないこと
+                    window.Resize(820, 260);
+                    requested = true;
+                }
+                else if (frame.FrameSize != initial)
+                {
+                    resized = frame.FrameSize;
+                    break;
+                }
+            }
+        }
+
+        Assert.NotNull(resized);
+        Assert.True(resized.Value.Width > initial.Width, $"initial={initial} resized={resized}");
+    }
+
+    [Fact]
     public async Task Closing_target_window_ends_capture_with_target_closed()
     {
         SkipUnlessInteractive();

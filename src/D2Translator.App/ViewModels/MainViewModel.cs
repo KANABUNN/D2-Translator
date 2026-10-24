@@ -6,6 +6,7 @@ using D2Translator.App.Presentation;
 using D2Translator.App.Services;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Chat;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Translation;
 using D2Translator.Capture.Windows;
 using D2Translator.Domain.Chat;
@@ -31,6 +32,9 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly Dictionary<Guid, MessageItem> _messageIndex = [];
     private readonly Dictionary<Guid, ChatMessage> _messages = [];
     private readonly Dictionary<Guid, TranslationView> _translations = [];
+
+    /// <summary>P02 を計測する発言。保留、失敗、手動の翻訳を経たものは利用者の操作を含むため除く。</summary>
+    private readonly HashSet<Guid> _awaitingTranslation = [];
     private int _hiddenCount;
     private readonly CaptureController _controller;
     private readonly AppSettingsService _settings;
@@ -38,6 +42,8 @@ public sealed partial class MainViewModel : ObservableObject
     private readonly CaptureProfileRepository _profiles;
     private readonly OcrRuntime _ocr;
     private readonly IDialogService _dialogs;
+    private readonly IDiagnosticsSink _diagnostics;
+    private readonly TimeProvider _time;
     private readonly ILogger<MainViewModel> _logger;
     private readonly Dispatcher _dispatcher;
 
@@ -52,6 +58,8 @@ public sealed partial class MainViewModel : ObservableObject
         TranslationCoordinator translator,
         AppDataLocation location,
         IDialogService dialogs,
+        IDiagnosticsSink diagnostics,
+        TimeProvider time,
         ILogger<MainViewModel> logger)
     {
         _controller = controller;
@@ -60,6 +68,8 @@ public sealed partial class MainViewModel : ObservableObject
         _profiles = profiles;
         _ocr = ocr;
         _dialogs = dialogs;
+        _diagnostics = diagnostics;
+        _time = time;
         _logger = logger;
         _dispatcher = Dispatcher.CurrentDispatcher;
 
@@ -311,10 +321,20 @@ public sealed partial class MainViewModel : ObservableObject
 
     // 停止は常に利用可能にする（仕様書 4.2）。IsBusy に依存させない
     [RelayCommand(CanExecute = nameof(CanStop))]
-    private Task StopAsync() => _controller.StopAsync();
+    private async Task StopAsync()
+    {
+        long started = _time.GetTimestamp();
+        await _controller.StopAsync();
+        _diagnostics.Latency(LatencyMetrics.StopResponse, _time.GetElapsedTime(started));
+    }
+
+    /// <summary>UI スレッドの未処理例外を記録して処理を続けた。</summary>
+    public void ReportUnexpectedError() =>
+        Notice = "予期しないエラーが発生しましたが、処理を続けています。種類を診断記録（データ保存先の diagnostics フォルダー）に残しました。";
 
     private void OnStateChanged(CaptureStateChangedEventArgs e)
     {
+        _diagnostics.Lifecycle("capture_state", ("state", e.Current.ToString()), ("reason", e.Reason?.ToString() ?? "-"));
         CaptureStateText = StatusLabels.Of(e.Current);
         UpdateOverlayStatus();
         if (e.Reason is ErrorCode reason)
@@ -380,6 +400,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             _messages.Remove(id);
             _translations.Remove(id);
+            _awaitingTranslation.Remove(id);
             if (_messageIndex.Remove(id, out MessageItem? removed))
             {
                 Messages.Remove(removed);
@@ -401,12 +422,38 @@ public sealed partial class MainViewModel : ObservableObject
             _selfCapture.Shown(shown);
         }
 
-        if (_messages.ContainsKey(view.MessageId))
+        if (_messages.TryGetValue(view.MessageId, out ChatMessage? message))
         {
             Render(view.MessageId);
+            RecordTranslationLatency(message, view);
         }
 
         UpdateUsage();
+    }
+
+    /// <summary>
+    /// P02: 取得したフレームの時刻から、自動で翻訳した訳の表示まで（仕様書 16.3）。
+    /// キャッシュと文脈の有無で分ける。保留や失敗を経たものは除き、件数は翻訳の記録で数える。
+    /// </summary>
+    private void RecordTranslationLatency(ChatMessage message, TranslationView view)
+    {
+        if (!_awaitingTranslation.Contains(message.MessageId))
+        {
+            return;
+        }
+
+        switch (view.Status)
+        {
+            case TranslationStatus.Queued or TranslationStatus.Translating:
+                return;
+            case TranslationStatus.Translated or TranslationStatus.NeedsReview when view.Text is not null:
+                _diagnostics.Latency(LatencyMetrics.TranslationShown, _time.GetUtcNow() - message.ObservedAt,
+                    ("cache", view.Trace?.FromCache == true ? "hit" : "miss"),
+                    ("context", view.Trace?.WithContext == true ? "on" : "off"));
+                break;
+        }
+
+        _awaitingTranslation.Remove(message.MessageId);
     }
 
     /// <summary>原文と訳文の両方を1行にまとめて表示する（仕様書 11.2）。</summary>
@@ -424,12 +471,24 @@ public sealed partial class MainViewModel : ObservableObject
         else
         {
             Messages.Add(item);
+            ChatMessage message = _messages[id];
+            if (!message.WasAlreadyVisible)
+            {
+                // P01: 取得したフレームの時刻から原文行の表示まで（仕様書 16.3）
+                _diagnostics.Latency(LatencyMetrics.OriginalShown, _time.GetUtcNow() - message.ObservedAt, ("kind", message.Kind.ToString()));
+                if (message.Kind == ChatLineKind.Player)
+                {
+                    _awaitingTranslation.Add(id);
+                }
+            }
+
             while (Messages.Count > MaxHistory)
             {
                 Guid oldest = Messages[0].MessageId;
                 _messageIndex.Remove(oldest);
                 _messages.Remove(oldest);
                 _translations.Remove(oldest);
+                _awaitingTranslation.Remove(oldest);
                 Messages.RemoveAt(0);
             }
         }

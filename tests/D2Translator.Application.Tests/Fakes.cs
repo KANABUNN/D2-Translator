@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Chat;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Ocr;
 using D2Translator.DictionaryContext;
 using D2Translator.TextTracking.Parsing;
@@ -75,6 +77,15 @@ internal sealed class FakeOcr : IOcrRecognizer
             Lines = [new OcrLine($"fill {frame.Pixels.Span[0]}", frame.RoiInFrame, [])],
         });
     }
+}
+
+internal sealed class MemorySink : IDiagnosticsSink
+{
+    private readonly ConcurrentQueue<DiagnosticsEvent> _events = new();
+
+    public IReadOnlyList<DiagnosticsEvent> Events => [.. _events];
+
+    public void Write(DiagnosticsEvent entry) => _events.Enqueue(entry);
 }
 
 internal static class TestPipelines

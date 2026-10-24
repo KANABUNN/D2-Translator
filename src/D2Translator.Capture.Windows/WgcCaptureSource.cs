@@ -40,9 +40,7 @@ internal sealed class WgcCaptureSource(WgcCaptureTarget target, TimeProvider tim
         WgcFrameGrabber? grabber = null;
         try
         {
-            // セッションの作成と破棄は取得対象を作ったスレッドで行う。フレームはフリースレッドで届く
-            grabber = await target.RunOnOwnerAsync(() => new WgcFrameGrabber(target.Item, request, channel.Writer, time))
-                .ConfigureAwait(false);
+            grabber = await CreateGrabberAsync(request, channel.Writer).ConfigureAwait(false);
 
             await foreach (RoiFrame frame in channel.Reader.ReadAllAsync(ct).ConfigureAwait(false))
             {
@@ -62,6 +60,20 @@ internal sealed class WgcCaptureSource(WgcCaptureTarget target, TimeProvider tim
             {
                 leftover.Dispose();
             }
+        }
+    }
+
+    private async Task<WgcFrameGrabber> CreateGrabberAsync(CaptureRequest request, ChannelWriter<RoiFrame> writer)
+    {
+        try
+        {
+            // セッションの作成と破棄は取得対象を作ったスレッドで行う。フレームはフリースレッドで届く
+            return await target.RunOnOwnerAsync(() => new WgcFrameGrabber(target.Item, request, writer, time)).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is SharpGen.Runtime.SharpGenException or System.Runtime.InteropServices.COMException)
+        {
+            // GPU デバイスを作れない（喪失直後やドライバーの更新中等）。取得側で有限回作り直す
+            throw new CaptureException(CaptureFailureKind.DeviceLost, "GPU デバイスを作成できません。", ex);
         }
     }
 

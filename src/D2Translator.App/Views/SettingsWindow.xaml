@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
         xmlns:views="clr-namespace:D2Translator.App.Views"
+        xmlns:p="clr-namespace:D2Translator.App.Presentation"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:SettingsViewModel}"
         Title="設定"
@@ -26,11 +27,12 @@
   <DockPanel Margin="16">
     <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-        <Button Content="既定値に戻す" Command="{Binding RestoreDefaultsCommand}" />
-        <Button Content="適用" Command="{Binding ApplyCommand}" IsDefault="True" />
+        <Button Content="既定値に戻す(_D)" Command="{Binding RestoreDefaultsCommand}" />
+        <Button Content="適用(_A)" Command="{Binding ApplyCommand}" IsDefault="True" />
         <Button Content="閉じる" IsCancel="True" Margin="0" />
       </StackPanel>
-      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0" />
+      <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"
+                 p:LiveRegion.Setting="Polite" />
     </DockPanel>
 
     <TabControl>

@@ -4,10 +4,13 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 
 ゲーム画面に表示された英語チャットを OS の画面取得と端末内 OCR で読み取り、日本語で表示します。日本語の返信を英訳し、利用者が確認してコピーできます。ゲームへの貼り付けと送信は利用者自身が行います。
 
-> **状態: 開発中（Phase 4 実装済み）** — 画面取得、OCR、発言の追跡、D2 辞書の注釈、GPT-6 Luna による受信の英日翻訳と返信の日英翻訳、オーバーレイと独立ウィンドウの切替（C方式）、ホットキー、設定画面まで動きます。安定性、署名付き配布、実機での受入試験は Phase 5 です。
+> **状態: 開発中（Phase 5 実装済み）** — 画面取得、OCR、発言の追跡、D2 辞書の注釈、GPT-6 Luna による受信の英日翻訳と返信の日英翻訳、オーバーレイと独立ウィンドウの切替（C方式）、ホットキー、設定画面、GPU 喪失からの復旧、本文なしの診断記録、署名付き MSIX の作成手順まで揃っています。8 時間の実機試験、翻訳品質の評価、署名した配布物のインストール確認は利用者の確認待ちです（[受入試験の証跡](docs/phase5/acceptance.md)）。
 
-## 仕様と記録
+## 使い方と記録
 
+- [操作説明](docs/user-guide.md)
+- [残存制限一覧](docs/limitations.md)
+- [配布、署名、更新](docs/distribution.md)
 - [日本語仕様書 v1.1](docs/D2_Chat_Translator_Specification_v1.1_ja.md)
 - [決定記録（D09 以降）](docs/decisions.md)
 - [Phase 0 版固定表](docs/phase0/version-pinning.md)
@@ -15,6 +18,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 - [Phase 2 実施記録](docs/phase2/report.md)
 - [Phase 3 実施記録](docs/phase3/report.md)
 - [Phase 4 実施記録](docs/phase4/report.md)
+- [Phase 5 実施記録](docs/phase5/report.md)、[受入試験の証跡（A01〜A12）](docs/phase5/acceptance.md)
 
 主な設計方針:
 
@@ -38,8 +42,9 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 | `src/D2Translator.TextTracking` | 行の組み立て、行の解析、発言の追跡、話者の一時 ID、文字誤り率 |
 | `src/D2Translator.DictionaryContext` | D2 辞書の検証付き読み込みと照合 |
 | `src/D2Translator.Translation.OpenAI` | OpenAI Responses API（gpt-6-luna 固定）の要求、応答の検証、再試行 |
-| `src/D2Translator.Infrastructure` | 保存先の解決、検証付き JSON の原子的な保存、API キーの DPAPI 保護 |
-| `tools/D2Translator.Eval` | OCR の文字誤り率の測定と、翻訳品質の採点用 TSV の作成を行う開発用ツール |
+| `src/D2Translator.Infrastructure` | 保存先の解決、検証付き JSON の原子的な保存、API キーの DPAPI 保護、診断メタデータの保存 |
+| `tests/D2Translator.Compliance.Tests` | 非侵入性の設計点検（ネイティブ関数の承認一覧、入力生成や他プロセスへの接続の不在、送信先の固定） |
+| `tools/D2Translator.Eval` | OCR の文字誤り率、翻訳品質の採点用 TSV、診断記録の集計、ゲームなしの耐久試験を行う開発用ツール |
 
 ## ビルドと試験
 
@@ -67,13 +72,25 @@ OCR の評価（画像と同名の .txt に正解を書く。評価画像は他�
 dotnet run --project tools/D2Translator.Eval -- eval-data
 ```
 
-翻訳品質の採点用 TSV の作成（英文を 1 行 1 例で用意する。`--yes` を付けると実際に送信し、API 利用料が生じる）:
+翻訳品質の採点用 TSV の作成（原文を 1 行 1 例で用意する。返信の日英は `--ja-en` を付ける。`--yes` を付けると実際に送信し、API 利用料が生じる）:
 
 ```bash
 dotnet run --project tools/D2Translator.Eval -- translate eval-data/translation.txt eval-data/translation.tsv
 ```
 
-MSIX パッケージの作成（署名は証明書の拇印を渡した場合のみ。スクリプトは証明書の作成や OS 設定の変更を行いません）:
+診断記録から性能と安定性の判定表（P01〜P04、P10〜P14）を作る（フォルダーを省くとアプリの保存先を読む）:
+
+```bash
+dotnet run --project tools/D2Translator.Eval -- diagnostics --out report.md
+```
+
+ゲームなしの耐久試験（自プロセスの模擬チャット画面を取得し、偽の API で翻訳まで回す。外部送信なし）:
+
+```bash
+dotnet run --project tools/D2Translator.Eval -- soak --minutes 60
+```
+
+MSIX パッケージの作成（LICENSE、第三者通知、SBOM を同梱。署名は証明書を渡した場合のみ。スクリプトは証明書の作成や OS 設定の変更を行いません。手順は [配布、署名、更新](docs/distribution.md)）:
 
 ```bash
 powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
@@ -94,7 +111,8 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | Phase 2 OCR、行追跡、辞書注釈 | 実装済み。受入評価用の画像の収集と、実機での追跡確認が残る（[記録](docs/phase2/report.md)） |
 | Phase 3 辞書、文脈、GPT-6 Luna 接続 | 実装済み。実 API での接続確認と翻訳品質の評価が残る（[記録](docs/phase3/report.md)） |
 | Phase 4 C方式、返信入力、コピー、設定の統合 | 実装済み。ゲーム上でオーバーレイ、返信、コピー、ホットキーを確認（[記録](docs/phase4/report.md)） |
-| Phase 5〜6 | 未着手 |
+| Phase 5 安定性、セキュリティ、実機共存、配布検証 | 実装済み。8 時間の実機試験、翻訳品質の評価、署名した配布物の確認が残る（[記録](docs/phase5/report.md)、[証跡](docs/phase5/acceptance.md)） |
+| Phase 6 | 未着手 |
 
 ## 操作
 
@@ -107,7 +125,7 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | 返信 | 「返信…」または Ctrl+Alt+J → 日本語を入力して Ctrl+Enter → 英訳を確認・編集 →「コピー」→ ゲームのチャット欄に貼り付けて自分で送信 |
 | 設定 | 「設定…」（ホットキーの変更もここで行う） |
 
-オーバーレイはボーダーレスかウィンドウ表示のゲームの上に表示します。排他フルスクリーンには対応しません。
+ボタンには Alt と組み合わせるアクセスキーがあります（例: 開始は Alt+S）。オーバーレイはボーダーレスかウィンドウ表示のゲームの上に表示します。排他フルスクリーンには対応しません。詳しくは [操作説明](docs/user-guide.md)。
 
 ## クラウド翻訳の使い方
 
@@ -117,3 +135,7 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 4. 「接続確認」で 1 回だけ翻訳を試す（API 利用料が生じ得る）。
 
 OpenAI 側でも予算上限を設定してください。アプリの推計額は請求額を保証しません。
+
+## ライセンス
+
+[MIT License](LICENSE)。配布物に含まれる第三者のソフトウェアのライセンスは [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) を参照してください。

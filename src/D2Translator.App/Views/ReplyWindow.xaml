@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        xmlns:p="clr-namespace:D2Translator.App.Presentation"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:ReplyViewModel}"
         Title="返信"
@@ -44,10 +45,10 @@
           </DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
-      <CheckBox Content="直近の会話を参考にする" IsChecked="{Binding UseContext}" IsEnabled="{Binding ContextAvailable}"
+      <CheckBox Content="直近の会話を参考にする(_K)" IsChecked="{Binding UseContext}" IsEnabled="{Binding ContextAvailable}"
                 VerticalAlignment="Center" Margin="0,0,12,0"
                 ToolTip="翻訳設定で文脈の送信を有効にしている時だけ使えます" />
-      <Button Content="英訳" Command="{Binding TranslateCommand}" />
+      <Button Content="英訳(_E)" Command="{Binding TranslateCommand}" />
     </WrapPanel>
 
     <DockPanel Grid.Row="3" Margin="0,0,0,4">
@@ -59,9 +60,9 @@
 
     <StackPanel Grid.Row="5" Margin="0,8,0,0">
       <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-        <Button Content="コピー" Command="{Binding CopyCommand}" />
-        <Button Content="逆翻訳で確認" Command="{Binding ReverseTranslateCommand}" ToolTip="英訳を日本語に戻して意味を確かめます（API 利用料が生じ得ます）" />
-        <Button Content="消去" Command="{Binding ClearCommand}" />
+        <Button Content="コピー(_C)" Command="{Binding CopyCommand}" />
+        <Button Content="逆翻訳で確認(_B)" Command="{Binding ReverseTranslateCommand}" ToolTip="英訳を日本語に戻して意味を確かめます（API 利用料が生じ得ます）" />
+        <Button Content="消去(_L)" Command="{Binding ClearCommand}" />
       </StackPanel>
       <Border BorderThickness="1" Padding="8" Margin="0,0,0,8"
               BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
@@ -75,7 +76,7 @@
           </Style>
         </Border.Style>
         <DockPanel>
-          <Button DockPanel.Dock="Right" Content="こちらを使う" Command="{Binding UseLateCandidateCommand}" Margin="8,0,0,0" />
+          <Button DockPanel.Dock="Right" Content="こちらを使う(_U)" Command="{Binding UseLateCandidateCommand}" Margin="8,0,0,0" />
           <TextBlock TextWrapping="Wrap">
             <Run Text="変更前の入力に対する英訳: " />
             <Run Text="{Binding LateCandidateText, Mode=OneWay}" />
@@ -86,6 +87,7 @@
       <TextBlock Text="{Binding Notes}" TextWrapping="Wrap" Margin="0,0,0,4" />
     </StackPanel>
 
-    <TextBlock Grid.Row="6" Text="{Binding Status}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0" />
+    <TextBlock Grid.Row="6" Text="{Binding Status}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0"
+               AutomationProperties.Name="返信の状態" p:LiveRegion.Setting="Polite" />
   </Grid>
 </Window>

@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+             xmlns:p="clr-namespace:D2Translator.App.Presentation"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:TranslationSettingsViewModel}">
   <!-- 翻訳の設定は送信内容の確認と認証情報を伴うため、操作した時点で反映する -->
@@ -24,7 +25,7 @@
           <TextBlock Style="{StaticResource StatusValue}" Text="{Binding KeyStatus}" />
         </WrapPanel>
         <DockPanel Margin="0,0,0,6">
-          <Button DockPanel.Dock="Right" Content="登録・差し替え" Click="SaveKey_Click" Margin="8,0,0,0" />
+          <Button DockPanel.Dock="Right" Content="登録・差し替え(_K)" Click="SaveKey_Click" Margin="8,0,0,0" />
           <PasswordBox x:Name="KeyBox" AutomationProperties.Name="API キー" VerticalContentAlignment="Center" />
         </DockPanel>
         <Button Content="API キーを削除" Command="{Binding DeleteKeyCommand}" HorizontalAlignment="Left" Margin="0,0,0,16" />
@@ -32,11 +33,11 @@
         <TextBlock Style="{StaticResource SectionHeader}" Text="接続確認" />
         <TextBlock TextWrapping="Wrap" Margin="0,0,0,6" Style="{StaticResource StatusLabel}"
                    Text="短い英文を 1 回だけ翻訳して、API キー、gpt-6-luna の利用可否、応答形式を確かめます。1 回分の API 利用料が生じ得ます。" />
-        <Button Content="接続確認" Command="{Binding TestConnectionCommand}" HorizontalAlignment="Left" Margin="0,0,0,6" />
+        <Button Content="接続確認(_C)" Command="{Binding TestConnectionCommand}" HorizontalAlignment="Left" Margin="0,0,0,6" />
         <TextBox Text="{Binding TestResult, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" MinHeight="48"
                  AutomationProperties.Name="接続確認の結果" Margin="0,0,0,12" />
 
-        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontWeight="SemiBold" p:LiveRegion.Setting="Polite" />
       </StackPanel>
     </ScrollViewer>
 </UserControl>

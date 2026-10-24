@@ -14,7 +14,7 @@
 | 対象 | 版 | 固定方法 |
 | --- | --- | --- |
 | .NET SDK | 10.0.204 | `global.json`（rollForward: latestPatch） |
-| .NET 実行環境 | 10.0.8（開発機） | 自己完結型配布時に同梱予定 |
+| .NET 実行環境 | 10.0.8 | 自己完結型の MSIX に同梱（Microsoft.NETCore.App.Runtime.win-x64、Microsoft.WindowsDesktop.App.Runtime.win-x64。Phase 5 の SBOM `docs/phase5/sbom-0.1.0.cdx.json` に版と SHA-512 を記録） |
 | TFM（Windows API を使う層） | `net10.0-windows10.0.19041.0` | `Directory.Build.props` |
 | TFM（Domain と Application） | `net10.0` | WPF と Windows SDK に依存しない |
 | WinRT 投影 | Microsoft.Windows.SDK.NET.Ref 10.0.19041.57 | TFM から SDK が自動選択 |
@@ -52,7 +52,7 @@
 
 | パッケージ | 版 | 状況 |
 | --- | --- | --- |
-| SharpGen.Runtime | 2.4.2-beta | Vortice 3.8.3 が依存するプレビュー版。Vortice の安定版はいずれも SharpGen のベータ版に依存しており、置換できない。正式配布前に、代替（CsWin32 による D3D11 呼出し等）と比較して採否を決める（未検証事項 U07） |
+| SharpGen.Runtime | 2.4.2-beta | Vortice 3.8.3 が依存するプレビュー版。Vortice の安定版はいずれも SharpGen のベータ版に依存しており、置換できない。正式配布前に、代替（CsWin32 による D3D11 呼出し等）と比較して採否を決める（未検証事項 U07）。Phase 5 の非侵入性の点検では、呼び出すネイティブ関数に禁止事項（他プロセスへの接続、入力生成等）は含まれなかった |
 | SharpGen.Runtime.COM | 2.4.2-beta | 同上 |
 | Vortice.DirectX | 3.8.3 | Vortice の共通部 |
 | Vortice.Mathematics | 2.1.0 | `Box` 型など |

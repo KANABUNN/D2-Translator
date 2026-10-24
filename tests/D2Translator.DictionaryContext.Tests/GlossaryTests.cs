@@ -90,4 +90,36 @@ public class GlossaryTests
 
         Assert.Single(GlossaryLoader.Validate(document with { Entries = [bad] }));
     }
+
+    [Fact]
+    public void Oversized_file_is_rejected_before_reading()
+    {
+        // 巨大な辞書（仕様書 18.3、T14）。中身を読まずに断る
+        string path = Path.GetTempFileName();
+        try
+        {
+            File.WriteAllBytes(path, new byte[GlossaryLoader.MaxFileBytes + 1]);
+
+            GlossaryLoadResult result = GlossaryLoader.LoadFile(path);
+
+            Assert.False(result.IsValid);
+            Assert.Contains("5MB", Assert.Single(result.Errors), StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Too_many_entries_and_too_long_entries_are_rejected()
+    {
+        GlossaryDocument document = GlossaryLoader.LoadExample().Document!;
+        GlossaryEntry entry = document.Entries[0];
+        GlossaryEntry[] many = [.. Enumerable.Range(0, GlossaryLoader.MaxEntries + 1).Select(i => entry with { SenseId = $"s{i}" })];
+        GlossaryEntry longEntry = entry with { SenseId = "long", Note = new string('x', GlossaryLoader.MaxEntryCharacters) };
+
+        Assert.Single(GlossaryLoader.Validate(document with { Entries = many }));
+        Assert.Single(GlossaryLoader.Validate(document with { Entries = [longEntry] }));
+    }
 }

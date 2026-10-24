@@ -11,7 +11,9 @@ using Windows.Storage.Streams;
 
 // 使い方:
 //   D2Translator.Eval <フォルダー> [--lang en-US] [--client ja] [--scale 2]
-//   D2Translator.Eval translate <英文の一覧.txt> <結果.tsv> [--yes]
+//   D2Translator.Eval translate <原文の一覧.txt> <結果.tsv> [--ja-en] [--yes]
+//   D2Translator.Eval diagnostics [診断記録のフォルダー] [--all] [--out 結果.md]
+//   D2Translator.Eval soak [--minutes 30] [--out フォルダー]
 //
 // OCR の評価: フォルダー内の画像（png/jpg）ごとに、同名の .txt を正解として読む。正解の各行は次のどちらか。
 //   本文だけを比べる行:   > Sounds bugged
@@ -19,13 +21,19 @@ using Windows.Storage.Streams;
 // 空行と # で始まる行は無視する。正解ファイルがない画像は認識結果だけを表示する。
 // 評価画像には他プレイヤーの名前が写るため、リポジトリに入れない（eval-data/ は .gitignore 済み）。
 //
-// 翻訳の評価（仕様書 16.3 P08、P09）: 英文を 1 行 1 例で GPT-6 Luna に送り、評価者 2 名が採点する TSV を作る。
+// 翻訳の評価（仕様書 16.3 P08、P09）: 原文を 1 行 1 例で GPT-6 Luna に送り、評価者 2 名が採点する TSV を作る。
+// 既定は受信の英日。--ja-en で返信の日英を評価する。
 // アプリで登録した API キー（DPAPI）を使い、API 利用料が生じる。--yes がなければ件数と推計費用だけを表示する。
+//
+// 性能と安定性の集計（仕様書 16.2 P01〜P04、P10〜P14）: アプリの診断記録を読み、判定表を作る。
+// フォルダーを省くとアプリのデータ保存先の diagnostics を読む。
 
 if (args.Length == 0)
 {
     Console.Error.WriteLine("usage: D2Translator.Eval <folder> [--lang en-US] [--client ja] [--scale 2]");
-    Console.Error.WriteLine("       D2Translator.Eval translate <input.txt> <output.tsv> [--yes]");
+    Console.Error.WriteLine("       D2Translator.Eval translate <input.txt> <output.tsv> [--ja-en] [--yes]");
+    Console.Error.WriteLine("       D2Translator.Eval diagnostics [folder] [--all] [--out report.md]");
+    Console.Error.WriteLine("       D2Translator.Eval soak [--minutes 30] [--out folder]");
     return 2;
 }
 
@@ -33,6 +41,18 @@ if (args[0] == "translate")
 {
     Console.OutputEncoding = System.Text.Encoding.UTF8;
     return await TranslationEval.RunAsync(args[1..]);
+}
+
+if (args[0] == "diagnostics")
+{
+    Console.OutputEncoding = System.Text.Encoding.UTF8;
+    return DiagnosticsReport.Run(args[1..]);
+}
+
+if (args[0] == "soak")
+{
+    Console.OutputEncoding = System.Text.Encoding.UTF8;
+    return await SoakRun.RunAsync(args[1..]);
 }
 
 string folder = Path.GetFullPath(args[0]);

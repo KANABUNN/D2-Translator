@@ -1,0 +1,410 @@
+{
+    "bomFormat":  "CycloneDX",
+    "specVersion":  "1.5",
+    "serialNumber":  "urn:uuid:cb502490-547a-49a2-b7f0-27755c91d588",
+    "version":  1,
+    "metadata":  {
+                     "timestamp":  "2026-10-24T12:04:33Z",
+                     "tools":  [
+                                   {
+                                       "name":  "scripts/generate-sbom.ps1"
+                                   }
+                               ],
+                     "component":  {
+                                       "type":  "application",
+                                       "name":  "D2 Chat Translator",
+                                       "version":  "0.1.0",
+                                       "licenses":  [
+                                                        {
+                                                            "license":  {
+                                                                            "id":  "MIT"
+                                                                        }
+                                                        }
+                                                    ],
+                                       "externalReferences":  [
+                                                                  {
+                                                                      "type":  "vcs",
+                                                                      "url":  "https://github.com/KANABUNN/D2-Translator"
+                                                                  }
+                                                              ]
+                                   }
+                 },
+    "components":  [
+                       {
+                           "type":  "library",
+                           "name":  "CommunityToolkit.Mvvm",
+                           "version":  "8.4.2",
+                           "purl":  "pkg:nuget/CommunityToolkit.Mvvm@8.4.2",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "59a742cc611cd94fb77b6d1abd12e7838a8db6de33a0e196add5084aa256ac77b7fc54a7ad88ee33949be3241bd3d2e19015ebac8e19b7774b2a044c6c8b6cae"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://github.com/CommunityToolkit/dotnet"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.DependencyInjection.Abstractions",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.DependencyInjection.Abstractions@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "f7fab299287b8550cc1931b0acbcfc311a79cd1c97cbd69d1833ace07c117672e2977a19198b967998db98780243d04bd6a06ba157e050add4fe76fad7ad7b0b"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.DependencyInjection",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.DependencyInjection@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "957c8ad8ee46a18bdfc56f1e085703d7a2456dca124ccd6c26400cd141d2d6367297d358316eb84ea9ba390153d080c18d98bec47b7de7f660fa7c5984616166"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.Logging.Abstractions",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.Logging.Abstractions@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "fb6e250b8a657db10335f2c075357f496292edd5bed7a5f81ddc9d3b747efb5df8912353cdc6d80382a94751dd87ab968ac07c65adc0cf0c8e9fe2be371588ba"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.Logging.Debug",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.Logging.Debug@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "744bef001abd4207eefd28139dc5c38c2b217099a03bdedb2ce9cc02ea810d2a27964e3e55794a24c1cf6a4f92efc4e53b1278efe818eef3e056e909b2bebd82"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.Logging",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.Logging@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "e88e3a7d33df81892b8d161f4576e1a3d58ebce7a54e73635ae670b3f8731870c0487d4b109780e1528af64df026f89da3ca3b8c9481e5690c4e89d7ec73356c"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.Options",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.Options@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "4c3603df74d24695ca6569664d73658f99028a1c5ab66bf611cd6ee82f9b3182e98424bb3e848b13d3e377f9ee9c3a04ef211393e2cb2a35495fbf0762d5a3a4"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Extensions.Primitives",
+                           "version":  "10.0.12",
+                           "purl":  "pkg:nuget/Microsoft.Extensions.Primitives@10.0.12",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "7587c22d1e76500fb70cbec2e08fe9bd26913e436ac6b5004266c52f6bb4cef60a2b3aa0ac5089974f037fe17569873c95ebbd26fa42f5bb144547691317015d"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.NETCore.App.Runtime.win-x64",
+                           "version":  "10.0.8",
+                           "purl":  "pkg:nuget/Microsoft.NETCore.App.Runtime.win-x64@10.0.8",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "209b1db0c9e053c137ebb55a9f008b2e3371460f3c56e60cb384b61c0b5941a96d3e6f8cd8e253819df4f0cd4b7ba1fc167e7bdaeb0d2c219da87a61505b346e"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.Windows.SDK.NET.Ref",
+                           "version":  "10.0.19041.57",
+                           "purl":  "pkg:nuget/Microsoft.Windows.SDK.NET.Ref@10.0.19041.57",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "4c8f45aae91165215f499e9f2e1d1c8ced17d0e2009f9bd928653f88dcc836ddc865e2bba3d6350e6b69fb1c04bfaf7a5ced5c1cc07b694a938ea977fca63dc6"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "license":  {
+                                                                "name":  "See URL",
+                                                                "url":  "https://aka.ms/WinSDKLicenseURL"
+                                                            }
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://aka.ms/WinSDKProjectURL"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+                           "version":  "10.0.8",
+                           "purl":  "pkg:nuget/Microsoft.WindowsDesktop.App.Runtime.win-x64@10.0.8",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "285aa92f57c387ed74791c72cf5ad0e37403a602e7f126e95d9ea76007f1c77727bf26f65a25e1a295550651ae504fd87b675fd132615bcac3a793b8711491ca"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://dot.net/"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "SharpGen.Runtime.COM",
+                           "version":  "2.4.2-beta",
+                           "purl":  "pkg:nuget/SharpGen.Runtime.COM@2.4.2-beta",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "f65c4314c89ea6aa379494333128c408220e35e09cd9fdc3ae89208fa1edad32d970949fb4d81c2db0fafe25d88f68a9864c20ad96f5a0bb03399c6815991ac1"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://github.com/SharpGenTools/SharpGenTools"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "SharpGen.Runtime",
+                           "version":  "2.4.2-beta",
+                           "purl":  "pkg:nuget/SharpGen.Runtime@2.4.2-beta",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "9e24ed580528bf517bc19180955784bd6f939eabe0e724e6848eebc6662ed94b68caed936c2f6d596a54a4cb343d083996ee6cbe8629080ced363c42a8c14fff"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://github.com/SharpGenTools/SharpGenTools"
+                                                      }
+                                                  ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Vortice.Direct3D11",
+                           "version":  "3.8.3",
+                           "purl":  "pkg:nuget/Vortice.Direct3D11@3.8.3",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "260154b30bb69a0ad2c1c7742911760277de13955b30481c89c9b13c3d60db25f2a263c81db9d7df095d04d1cf3b3cc3d14442d5627fa4ed7299f8b78a6670be"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Vortice.DirectX",
+                           "version":  "3.8.3",
+                           "purl":  "pkg:nuget/Vortice.DirectX@3.8.3",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "9cac126afbf4c39ac317ba6b49e7ea0153c3713caaadf6712853157edb625cf7e6eb655d03fd5df9bdcf8426695b8c4eee35dccd70f08d0756803d731acbccf3"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Vortice.DXGI",
+                           "version":  "3.8.3",
+                           "purl":  "pkg:nuget/Vortice.DXGI@3.8.3",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "31b0149d3790e960fdf5cb4076b8f90903b623ba1a6b1d0ab767957564948f46d83fd11dd3bdbafacedd2077b8fadaa1a6620d5bf75c3edd2636d73bda8f84d3"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ]
+                       },
+                       {
+                           "type":  "library",
+                           "name":  "Vortice.Mathematics",
+                           "version":  "2.1.0",
+                           "purl":  "pkg:nuget/Vortice.Mathematics@2.1.0",
+                           "hashes":  [
+                                          {
+                                              "alg":  "SHA-512",
+                                              "content":  "28af928cd4ae29d3fecdb6af7a4b9b8bebda79bd49a3893ced917a08c9155a3afa46327073ca5e56d9a0cd75c320ccb8642dd9212ca4de5958deaeb92123a405"
+                                          }
+                                      ],
+                           "licenses":  [
+                                            {
+                                                "expression":  "MIT"
+                                            }
+                                        ],
+                           "externalReferences":  [
+                                                      {
+                                                          "type":  "website",
+                                                          "url":  "https://github.com/amerkoleci/Vortice.Mathematics"
+                                                      }
+                                                  ]
+                       }
+                   ]
+}

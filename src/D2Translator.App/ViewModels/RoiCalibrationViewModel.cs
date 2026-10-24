@@ -87,6 +87,19 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
     [ObservableProperty]
     public partial bool IsPreviewFrozen { get; set; }
 
+    // ドラッグの代わりにキーボードで ROI を指定する（取得画像のピクセル、仕様書 17.2）
+    [ObservableProperty]
+    public partial int RoiLeft { get; set; }
+
+    [ObservableProperty]
+    public partial int RoiTop { get; set; }
+
+    [ObservableProperty]
+    public partial int RoiWidth { get; set; }
+
+    [ObservableProperty]
+    public partial int RoiHeight { get; set; }
+
     partial void OnIsPreviewFrozenChanged(bool value) => _frozen = value;
 
     public void StartPreview()
@@ -111,6 +124,19 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
 
         _selection = NormalizedRect.FromPixels(rect, _displayedSize);
         UpdateSelectionDisplay();
+    }
+
+    /// <summary>数値で入力した左上と大きさを選択に反映する。画像の外は画像の端に寄せる。</summary>
+    [RelayCommand]
+    private void ApplyNumbers()
+    {
+        if (_displayedSize.IsEmpty)
+        {
+            StatusText = "プレビューが表示されてから設定してください。";
+            return;
+        }
+
+        SetSelection(RoiLeft, RoiTop, RoiLeft + Math.Max(0, RoiWidth), RoiTop + Math.Max(0, RoiHeight));
     }
 
     [RelayCommand]
@@ -264,6 +290,7 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
         PixelRect pixels = selection.ToPixels(_displayedSize);
         SelectionPixels = pixels;
         SelectionText = $"ROI: {pixels}（正規化 {selection}）";
+        (RoiLeft, RoiTop, RoiWidth, RoiHeight) = (pixels.X, pixels.Y, pixels.Width, pixels.Height);
     }
 
     private bool TryCropSelection([NotNullWhen(true)] out RoiFrame? frame, [NotNullWhen(false)] out string? problem)

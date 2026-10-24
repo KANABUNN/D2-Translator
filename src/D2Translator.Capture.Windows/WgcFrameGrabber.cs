@@ -42,6 +42,9 @@ internal sealed unsafe class WgcFrameGrabber : IDisposable
     private readonly Direct3D11CaptureFramePool _framePool;
     private readonly GraphicsCaptureSession _session;
 
+    /// <summary>作成元（取得対象を作ったスレッド）の同期コンテキスト。フレームプールの作り直しはここで行う（決定 D12）。</summary>
+    private readonly SynchronizationContext? _ownerContext = SynchronizationContext.Current;
+
     private SizeInt32 _poolSize;
     private ID3D11Texture2D? _staging;
     private PixelSize _stagingSize;
@@ -97,7 +100,7 @@ internal sealed unsafe class WgcFrameGrabber : IDisposable
                 {
                     // 対象サイズの変更。プールを作り直し、このフレームは使わない
                     _poolSize = contentSize;
-                    _framePool.Recreate(_winRtDevice, PixelFormat, BufferCount, contentSize);
+                    RecreatePool(contentSize);
                     return;
                 }
 
@@ -125,6 +128,42 @@ internal sealed unsafe class WgcFrameGrabber : IDisposable
             {
                 _writer.TryComplete(new CaptureException(CaptureFailureKind.DeviceLost, "フレームの取得に失敗しました。", ex));
             }
+        }
+    }
+
+    /// <summary>
+    /// フレームプールを新しい大きさで作り直す。フレームの受信スレッドから呼ぶと RPC_E_WRONG_THREAD になるため、
+    /// 作成元のスレッドへ送る。作り直すまでに届いたフレームは古い大きさのまま捨てられる。
+    /// </summary>
+    private void RecreatePool(SizeInt32 size)
+    {
+        void Recreate()
+        {
+            lock (_gate)
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    _framePool.Recreate(_winRtDevice, PixelFormat, BufferCount, size);
+                }
+                catch (Exception ex) when (ex is SharpGen.Runtime.SharpGenException or System.Runtime.InteropServices.COMException)
+                {
+                    _writer.TryComplete(new CaptureException(CaptureFailureKind.DeviceLost, "取得の作り直しに失敗しました。", ex));
+                }
+            }
+        }
+
+        if (_ownerContext is null)
+        {
+            Recreate();
+        }
+        else
+        {
+            _ownerContext.Post(_ => Recreate(), null);
         }
     }
 

@@ -25,6 +25,11 @@ public sealed record MessageItem(
 
     public bool HasTranslationNote => TranslationNote.Length > 0;
 
+    /// <summary>スクリーンリーダーが読む 1 行の要約（仕様書 17.2）。既定ではレコードの文字列表現が読まれてしまう。</summary>
+    public string AccessibleName =>
+        $"{Time} {Header}{(Status.Length > 0 ? $"（{Status}）" : string.Empty)}。原文: {Text}" +
+        (HasTranslation ? $"。訳: {Translation}" : string.Empty);
+
     public static MessageItem From(ChatMessage message, TranslationView? translation)
     {
         string header = message.Kind == ChatLineKind.Own

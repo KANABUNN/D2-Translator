@@ -21,13 +21,16 @@ internal static class TranslationEval
     {
         if (args.Length < 2)
         {
-            Console.Error.WriteLine("usage: D2Translator.Eval translate <input.txt> <output.tsv> [--yes]");
+            Console.Error.WriteLine("usage: D2Translator.Eval translate <input.txt> <output.tsv> [--ja-en] [--yes]");
             return 2;
         }
 
+        // 既定は受信の英日。--ja-en は返信の日英（アプリの返信画面と同じ指示、文体は一般）
+        TranslationDirection direction = args.Contains("--ja-en") ? TranslationDirection.JaEn : TranslationDirection.EnJa;
+        Func<string, string, IReadOnlyList<string>> check = direction == TranslationDirection.JaEn ? TranslationChecks.JaEn : TranslationChecks.EnJa;
         string[] lines = [.. File.ReadAllLines(args[0]).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith('#'))];
         decimal estimate = lines.Length * OpenAIPricing.EstimateUsd(new TranslationUsage(EstimatedInputTokens, 0, EstimatedOutputTokens, 0));
-        Console.WriteLine($"{lines.Length} 例を gpt-6-luna（推論量 none）で翻訳します。推計 {estimate:0.0000} 米ドル（{OpenAIPricing.ReferenceDate:yyyy-MM-dd} 時点の単価）。");
+        Console.WriteLine($"{lines.Length} 例を gpt-6-luna（推論量 none、{(direction == TranslationDirection.JaEn ? "日英" : "英日")}）で翻訳します。推計 {estimate:0.0000} 米ドル（{OpenAIPricing.ReferenceDate:yyyy-MM-dd} 時点の単価）。");
         if (!args.Contains("--yes"))
         {
             Console.WriteLine("送信するには --yes を付けて実行してください。");
@@ -56,16 +59,17 @@ internal static class TranslationEval
                 RequestId = Guid.NewGuid(),
                 MessageId = Guid.NewGuid(),
                 Revision = 1,
-                Direction = TranslationDirection.EnJa,
+                Direction = direction,
                 SourceText = source,
-                Glossary = [.. glossary.Find(source).Where(a => a.ReferenceId is not null).Select(a => new GlossaryHint(a.ReferenceId!, a.Text, a.Note))],
+                Glossary = direction == TranslationDirection.JaEn ? []
+                    : [.. glossary.Find(source).Where(a => a.ReferenceId is not null).Select(a => new GlossaryHint(a.ReferenceId!, a.Text, a.Note))],
                 GlossaryVersion = glossary.DictionaryVersion,
                 Deadline = TimeSpan.FromSeconds(10),
             };
 
             TranslationResult result = await provider.TranslateAsync(request, CancellationToken.None);
             usage.Record(result);
-            string checks = result.IsSuccess ? string.Join(" ", TranslationChecks.EnJa(source, result.TranslatedText!)) : string.Empty;
+            string checks = result.IsSuccess ? string.Join(" ", check(source, result.TranslatedText!)) : string.Empty;
             output.AppendLine(string.Join('\t',
                 i + 1,
                 Clean(source),

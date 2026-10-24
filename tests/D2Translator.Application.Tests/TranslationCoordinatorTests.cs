@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using D2Translator.Application.Chat;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Translation;
 using D2Translator.Domain.Errors;
 using D2Translator.Domain.Geometry;
@@ -59,6 +60,7 @@ public sealed class TranslationCoordinatorTests : IAsyncLifetime
     private readonly ChatFeed _feed = TestPipelines.NewFeed();
     private readonly FakeTranslator _translator = new();
     private readonly ConcurrentQueue<TranslationView> _views = new();
+    private readonly MemorySink _diagnostics = new();
     private TranslationCoordinator? _coordinator;
 
     private static TranslationOptions Options(bool cloud = true, int cap = 1000) =>
@@ -67,7 +69,7 @@ public sealed class TranslationCoordinatorTests : IAsyncLifetime
     private TranslationCoordinator Start(TranslationOptions? options = null, ISecretStore? secrets = null)
     {
         _coordinator = new TranslationCoordinator(_feed, _translator, secrets ?? new MemorySecrets(), options ?? Options(),
-            TimeProvider.System, NullLogger<TranslationCoordinator>.Instance);
+            TimeProvider.System, NullLogger<TranslationCoordinator>.Instance, _diagnostics);
         _coordinator.Updated += (_, v) => _views.Enqueue(v);
         _feed.Reset(Guid.NewGuid());
         return _coordinator;
@@ -150,6 +152,29 @@ public sealed class TranslationCoordinatorTests : IAsyncLifetime
         Assert.Equal("Kestrel 雑魚を片付けて", view.Text);
         // 開始前から見えていた行は自動では送らない
         Assert.Contains(_views, v => v.Status == TranslationStatus.Held && v.CanRequest);
+    }
+
+    [Fact]
+    public async Task Requests_are_recorded_for_diagnostics_without_text()
+    {
+        Start();
+        _feed.OnObservation(Observation(Baseline), Ms(0));
+        ShowNew(1000, [Baseline], Request);
+
+        TranslationView view = await WaitFor(v => v.Status == TranslationStatus.Translated);
+
+        Assert.Equal(new TranslationTrace(FromCache: false, WithContext: false), view.Trace);
+        DiagnosticsEvent recorded = Assert.Single(_diagnostics.Events, e => e.Kind == DiagnosticsKinds.Translation);
+        Assert.Equal("incoming", recorded.Name);
+        Assert.Equal("Success", recorded.Tags["outcome"]);
+        Assert.Equal("miss", recorded.Tags["cache"]);
+        Assert.Equal(OpenAIFixedProfile.ModelId, recorded.Tags["response_model"]);
+        Assert.Equal(100, recorded.Values["input_tokens"]);
+        // 本文、訳文、名前を残さない（仕様書 17.4）
+        string all = string.Join(" ", recorded.Tags.Keys.Concat(recorded.Tags.Values).Concat(recorded.Values.Keys));
+        Assert.DoesNotContain("Kestrel", all, StringComparison.Ordinal);
+        Assert.DoesNotContain("adds", all, StringComparison.Ordinal);
+        Assert.DoesNotContain("雑魚", all, StringComparison.Ordinal);
     }
 
     [Fact]

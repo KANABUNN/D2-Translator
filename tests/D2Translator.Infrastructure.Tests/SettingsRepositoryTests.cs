@@ -102,6 +102,25 @@ public class SettingsRepositoryTests
     }
 
     [Fact]
+    public void Settings_from_a_newer_version_are_rejected_and_kept_for_recovery()
+    {
+        // 新しい版から古い版へ戻した場合（T18）。既定値で起動し、ファイルは書き換えない（実行中の設定は AppSettingsService が保存しない）
+        using var temp = new TempDirectory();
+        var repository = new SettingsRepository(temp.Location);
+        repository.Save(new AppSettings { Display = new DisplaySettings { FontSizeDip = 22 } });
+        string path = temp.Location.SettingsPath;
+        string newer = File.ReadAllText(path).Replace("\"schemaVersion\": 1", "\"schemaVersion\": 2", StringComparison.Ordinal);
+        File.WriteAllText(path, newer);
+
+        SettingsLoadResult result = repository.Load();
+
+        Assert.Equal(SettingsLoadStatus.Invalid, result.Status);
+        Assert.Contains(result.Issues, i => i.Path == "schemaVersion");
+        Assert.Equal(new AppSettings().Display, result.Settings.Display);
+        Assert.Equal(newer, File.ReadAllText(path));
+    }
+
+    [Fact]
     public void Invalid_settings_are_not_saved()
     {
         using var temp = new TempDirectory();

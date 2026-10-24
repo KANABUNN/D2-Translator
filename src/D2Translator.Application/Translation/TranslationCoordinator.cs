@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using D2Translator.Application.Chat;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Domain.Chat;
 using D2Translator.Domain.Errors;
 using D2Translator.Domain.Settings;
@@ -47,6 +48,7 @@ public enum TranslationStatus
 
 /// <param name="IsStale">訂正前の原文に対する訳。</param>
 /// <param name="CanRequest">利用者が手動で翻訳を依頼できる。</param>
+/// <param name="Trace">訳文の出どころ。遅延をキャッシュと文脈の有無で分けて計測するために使う（仕様書 16.3）。</param>
 public sealed record TranslationView(
     Guid MessageId,
     TranslationStatus Status,
@@ -56,7 +58,10 @@ public sealed record TranslationView(
     IReadOnlyList<string> Warnings,
     bool IsStale,
     bool CanRequest,
-    ErrorCode? Error);
+    ErrorCode? Error,
+    TranslationTrace? Trace = null);
+
+public sealed record TranslationTrace(bool FromCache, bool WithContext);
 
 /// <summary>翻訳に関わる設定の写し。変更は <see cref="TranslationCoordinator.Configure"/> で反映する。</summary>
 public sealed record TranslationOptions(
@@ -98,6 +103,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
     private readonly ISecretStore _secrets;
     private readonly TimeProvider _time;
     private readonly ILogger<TranslationCoordinator> _logger;
+    private readonly IDiagnosticsSink _diagnostics;
     private readonly Lock _gate = new();
     private readonly Dictionary<Guid, Record> _records = [];
     private readonly LinkedList<Guid> _order = new();
@@ -117,7 +123,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
     private int _sessionRequests;
 
     public TranslationCoordinator(ChatFeed feed, ITranslationProvider provider, ISecretStore secrets, TranslationOptions options,
-        TimeProvider time, ILogger<TranslationCoordinator> logger)
+        TimeProvider time, ILogger<TranslationCoordinator> logger, IDiagnosticsSink? diagnostics = null)
     {
         _feed = feed;
         _provider = provider;
@@ -125,6 +131,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
         _options = options;
         _time = time;
         _logger = logger;
+        _diagnostics = diagnostics ?? NullDiagnosticsSink.Instance;
         _cache = new TranslationCache(time);
         _breaker = new CircuitBreaker(time);
         _rate = new RequestRateLimiter(time);
@@ -264,7 +271,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             MaxOutputTokens = options.MaxOutputTokens,
         };
 
-        return SendPriorityAsync(request, anonymized, TranslationChecks.JaEn, ct);
+        return SendPriorityAsync(request, anonymized, TranslationChecks.JaEn, "reply", ct);
     }
 
     /// <summary>英訳候補を日本語へ戻して意味を確かめる（逆翻訳、仕様書 10.1）。追加の API 利用になる。</summary>
@@ -284,11 +291,11 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             MaxOutputTokens = options.MaxOutputTokens,
         };
 
-        return SendPriorityAsync(request, new AnonymizedText(english, new Dictionary<string, string>()), TranslationChecks.EnJa, ct);
+        return SendPriorityAsync(request, new AnonymizedText(english, new Dictionary<string, string>()), TranslationChecks.EnJa, "reverse", ct);
     }
 
     private async Task<ReplyTranslation> SendPriorityAsync(TranslationRequest request, AnonymizedText anonymized,
-        Func<string, string, IReadOnlyList<string>> check, CancellationToken ct)
+        Func<string, string, IReadOnlyList<string>> check, string purpose, CancellationToken ct)
     {
         string cacheKey = TranslationCache.KeyOf(request);
         bool limitReached;
@@ -309,6 +316,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             {
                 _breaker.Release();
                 _usage.RecordCacheHit();
+                RecordRequest(purpose, request, cached, fromCache: true);
                 return ReplyTranslation.From(cached, anonymized, check);
             }
 
@@ -374,6 +382,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
         }
 
         _usage.Record(result);
+        RecordRequest(purpose, request, result, fromCache: false);
         bool stateChanged;
         lock (_gate)
         {
@@ -424,6 +433,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
 
         TranslationResult result = await _provider.TranslateAsync(request, ct).ConfigureAwait(false);
         _usage.Record(result);
+        RecordRequest("test", request, result, fromCache: false);
         lock (_gate)
         {
             _sessionRequests++;
@@ -616,6 +626,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             result = await _provider.TranslateAsync(request, _shutdown.Token).ConfigureAwait(false);
         }
         _usage.Record(result);
+        RecordRequest("incoming", request, result, fromCache: false);
 
         TranslationView? view;
         bool stateChanged;
@@ -631,7 +642,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             else if (result.IsSuccess)
             {
                 _cache.Set(cacheKey, result);
-                view = ApplySuccess(record, item, result, anonymized);
+                view = ApplySuccess(record, item, result, anonymized, new TranslationTrace(FromCache: false, request.Context.Count > 0));
             }
             else
             {
@@ -691,7 +702,8 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             {
                 _usage.RecordCacheHit();
                 _breaker.Record(TranslationOutcome.Success);
-                return (null, ApplySuccess(record, item, cached, anonymized), false);
+                RecordRequest("incoming", request, cached, fromCache: true);
+                return (null, ApplySuccess(record, item, cached, anonymized, new TranslationTrace(FromCache: true, request.Context.Count > 0)), false);
             }
 
             if (_sessionRequests >= _options.SessionRequestCap)
@@ -741,7 +753,7 @@ public sealed class TranslationCoordinator : IAsyncDisposable
         };
     }
 
-    private static TranslationView ApplySuccess(Record record, WorkItem item, TranslationResult result, AnonymizedText anonymized)
+    private static TranslationView ApplySuccess(Record record, WorkItem item, TranslationResult result, AnonymizedText anonymized, TranslationTrace trace)
     {
         string translated = result.TranslatedText!;
         IReadOnlyList<string> problems = TranslationChecks.EnJa(anonymized.Text, translated);
@@ -752,8 +764,52 @@ public sealed class TranslationCoordinator : IAsyncDisposable
             canRequest: true,
             text: Anonymizer.Restore(translated, anonymized.Originals),
             ambiguities: result.Ambiguities,
-            warnings: result.Warnings);
+            warnings: result.Warnings,
+            trace: trace);
     }
+
+    /// <summary>
+    /// 要求ごとの計測情報（仕様書 15.1 の 7、17.4、T20）。本文と訳文は残さず、用途、方向、結果、
+    /// キャッシュと文脈の有無、応答モデル、試行回数、遅延、利用量だけを残す。
+    /// </summary>
+    private void RecordRequest(string purpose, TranslationRequest request, TranslationResult result, bool fromCache)
+    {
+        var values = new Dictionary<string, double>();
+        if (!fromCache)
+        {
+            values["latency_ms"] = Math.Round(result.Latency.TotalMilliseconds, 1);
+            values["attempts"] = result.Attempts;
+            if (result.Usage is TranslationUsage usage)
+            {
+                values["input_tokens"] = usage.InputTokens;
+                values["cached_tokens"] = usage.CachedInputTokens;
+                values["output_tokens"] = usage.OutputTokens;
+                values["usd"] = (double)OpenAIPricing.EstimateUsd(usage);
+            }
+        }
+
+        _diagnostics.Write(new DiagnosticsEvent(DiagnosticsKinds.Translation, purpose)
+        {
+            Values = values,
+            Tags = new Dictionary<string, string>
+            {
+                ["direction"] = request.Direction.ToString(),
+                ["cache"] = fromCache ? "hit" : "miss",
+                ["context"] = request.Context.Count > 0 ? "on" : "off",
+                ["outcome"] = result.Outcome.ToString(),
+                ["requested_model"] = result.RequestedModel,
+                ["response_model"] = ModelTag(result.ResponseModel),
+                ["effort"] = OpenAIFixedProfile.ReasoningEffort,
+                ["usage"] = fromCache ? "cached" : result.Usage is null ? "unknown" : "reported",
+            },
+        });
+    }
+
+    /// <summary>応答のモデル名はモデル ID の形をしている時だけ残す。</summary>
+    private static string ModelTag(string? model) =>
+        model is null ? "none"
+        : model.Length <= 64 && model.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_' or ':') ? model
+        : "other";
 
     /// <summary>サービス全体を止める結果を反映する。状態が変わったら true。</summary>
     private bool ApplyServiceOutcome(TranslationResult result)
@@ -867,7 +923,8 @@ public sealed class TranslationCoordinator : IAsyncDisposable
         public int AutoRetranslations { get; set; }
 
         public TranslationView Set(TranslationStatus status, string? detail, bool canRequest, ErrorCode? error = null, bool stale = false,
-            string? text = null, IReadOnlyList<TranslationAmbiguity>? ambiguities = null, IReadOnlyList<string>? warnings = null)
+            string? text = null, IReadOnlyList<TranslationAmbiguity>? ambiguities = null, IReadOnlyList<string>? warnings = null,
+            TranslationTrace? trace = null)
         {
             // 訳文は新しい訳が出るまで残し、状態だけを更新する
             View = new TranslationView(
@@ -879,7 +936,8 @@ public sealed class TranslationCoordinator : IAsyncDisposable
                 warnings ?? View?.Warnings ?? [],
                 stale || (text is null && View?.IsStale == true),
                 canRequest,
-                error);
+                error,
+                text is null ? View?.Trace : trace);
             return View;
         }
     }

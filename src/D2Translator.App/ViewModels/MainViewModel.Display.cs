@@ -3,6 +3,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using D2Translator.App.Services;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Display;
 using D2Translator.Domain.Capture;
 using D2Translator.Domain.Settings;
@@ -94,9 +95,14 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private void ToggleDisplayMode()
     {
+        long started = _time.GetTimestamp();
         DisplayMode next = IsOverlayMode ? DisplayMode.Window : DisplayMode.Overlay;
         _settings.Update(s => s with { Display = s.Display with { Mode = next } });
         ApplyDisplaySettings(_settings.Current);
+        // P04: 描画と配置を終えた後の優先度で計測する（仕様書 16.2）
+        _dispatcher.InvokeAsync(
+            () => _diagnostics.Latency(LatencyMetrics.DisplaySwitch, _time.GetElapsedTime(started), ("to", next.ToString())),
+            System.Windows.Threading.DispatcherPriority.ContextIdle);
     }
 
     /// <summary>表示だけを隠す。取得と翻訳は止めない（仕様書 4.2）。</summary>

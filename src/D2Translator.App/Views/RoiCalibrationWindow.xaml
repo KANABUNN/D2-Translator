@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        xmlns:p="clr-namespace:D2Translator.App.Presentation"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:RoiCalibrationViewModel}"
         Title="ROI 調整"
@@ -41,17 +42,41 @@
     <DockPanel Grid.Column="2">
       <StackPanel DockPanel.Dock="Top">
         <TextBlock Style="{StaticResource SectionHeader}" Text="{Binding TargetName, StringFormat=対象: {0}}" TextWrapping="Wrap" />
-        <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" Margin="0,0,0,12" />
+        <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" Margin="0,0,0,12" p:LiveRegion.Setting="Polite" />
         <TextBlock TextWrapping="Wrap" Margin="0,0,0,8"
-                   Text="プレビュー上でチャット欄をドラッグして囲んでください。チャットが消える前に「プレビューを止める」で静止できます。" />
-        <CheckBox Content="プレビューを止める" IsChecked="{Binding IsPreviewFrozen}" Margin="0,0,0,12" />
+                   Text="プレビュー上でチャット欄をドラッグして囲むか、下の数値で指定してください。チャットが消える前に「プレビューを止める」で静止できます。" />
+        <CheckBox Content="プレビューを止める(_F)" IsChecked="{Binding IsPreviewFrozen}" Margin="0,0,0,12" />
         <TextBlock Style="{StaticResource StatusLabel}" Text="選択中の領域" />
-        <TextBlock Text="{Binding SelectionText}" TextWrapping="Wrap" Margin="0,0,0,12" />
-        <Button Content="試し読み" Command="{Binding TestReadCommand}" HorizontalAlignment="Left" Margin="0,0,0,8" />
+        <TextBlock Text="{Binding SelectionText}" TextWrapping="Wrap" Margin="0,0,0,8" p:LiveRegion.Setting="Polite" />
+        <!-- マウスを使わずに指定する（取得画像のピクセル） -->
+        <Grid Margin="0,0,0,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Label Grid.Row="0" Grid.Column="0" Content="左(_X)" Target="{Binding ElementName=RoiLeftBox}" Padding="0,0,6,0" VerticalAlignment="Center" />
+          <TextBox x:Name="RoiLeftBox" Grid.Row="0" Grid.Column="1" Text="{Binding RoiLeft}" Margin="0,0,8,4" AutomationProperties.Name="ROI の左端（ピクセル）" />
+          <Label Grid.Row="0" Grid.Column="2" Content="上(_Y)" Target="{Binding ElementName=RoiTopBox}" Padding="0,0,6,0" VerticalAlignment="Center" />
+          <TextBox x:Name="RoiTopBox" Grid.Row="0" Grid.Column="3" Text="{Binding RoiTop}" Margin="0,0,0,4" AutomationProperties.Name="ROI の上端（ピクセル）" />
+          <Label Grid.Row="1" Grid.Column="0" Content="幅(_W)" Target="{Binding ElementName=RoiWidthBox}" Padding="0,0,6,0" VerticalAlignment="Center" />
+          <TextBox x:Name="RoiWidthBox" Grid.Row="1" Grid.Column="1" Text="{Binding RoiWidth}" Margin="0,0,8,0" AutomationProperties.Name="ROI の幅（ピクセル）" />
+          <Label Grid.Row="1" Grid.Column="2" Content="高さ(_H)" Target="{Binding ElementName=RoiHeightBox}" Padding="0,0,6,0" VerticalAlignment="Center" />
+          <TextBox x:Name="RoiHeightBox" Grid.Row="1" Grid.Column="3" Text="{Binding RoiHeight}" AutomationProperties.Name="ROI の高さ（ピクセル）" />
+        </Grid>
+        <WrapPanel Margin="0,0,0,8">
+          <Button Content="数値で設定(_N)" Command="{Binding ApplyNumbersCommand}" Margin="0,0,8,4" />
+          <Button Content="試し読み(_T)" Command="{Binding TestReadCommand}" Margin="0,0,0,4" />
+        </WrapPanel>
       </StackPanel>
 
       <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-        <Button Content="保存" Command="{Binding SaveCommand}" IsDefault="True" />
+        <Button Content="保存(_S)" Command="{Binding SaveCommand}" IsDefault="True" />
         <Button Content="取消" Command="{Binding CancelCommand}" IsCancel="True" Margin="0" />
       </StackPanel>
 

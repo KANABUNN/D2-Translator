@@ -5,6 +5,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/D2Translator.Application.Tests/D2Translator.Application.Tests.csproj" />
     <Project Path="tests/D2Translator.Capture.Windows.Tests/D2Translator.Capture.Windows.Tests.csproj" />
+    <Project Path="tests/D2Translator.Compliance.Tests/D2Translator.Compliance.Tests.csproj" />
     <Project Path="tests/D2Translator.DictionaryContext.Tests/D2Translator.DictionaryContext.Tests.csproj" />
     <Project Path="tests/D2Translator.Domain.Tests/D2Translator.Domain.Tests.csproj" />
     <Project Path="tests/D2Translator.Infrastructure.Tests/D2Translator.Infrastructure.Tests.csproj" />

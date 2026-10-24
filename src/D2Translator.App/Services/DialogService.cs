@@ -3,6 +3,7 @@ using System.Windows.Interop;
 using D2Translator.App.ViewModels;
 using D2Translator.App.Views;
 using D2Translator.Application.Capture;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Reply;
 using D2Translator.Application.Translation;
 using D2Translator.Capture.Windows;
@@ -49,6 +50,7 @@ internal sealed class DialogService(
     TranslationCoordinator translator,
     ISecretStore secrets,
     IClipboardService clipboard,
+    IDiagnosticsSink diagnostics,
     HotkeyStatusStore hotkeys) : IDialogService
 {
     private ReplyWindow? _reply;
@@ -91,7 +93,7 @@ internal sealed class DialogService(
         }
 
         // 返信画面はモーダルにしない。オーバーレイや受信履歴を見ながら書けるようにする
-        var viewModel = new ReplyViewModel(translator, clipboard, settings,
+        var viewModel = new ReplyViewModel(translator, clipboard, settings, diagnostics, time,
             message => MessageBox.Show(Owner, message, "確認", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes);
         _reply = new ReplyWindow(viewModel) { Owner = Owner };
         _reply.Closed += (_, _) => _reply = null;

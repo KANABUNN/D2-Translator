@@ -1,12 +1,17 @@
 <#
 .SYNOPSIS
-  Builds an MSIX package of D2 Chat Translator (specification 6.2).
+  Builds an MSIX package of D2 Chat Translator (specification 6.2, 17.3).
 
 .DESCRIPTION
-  1. dotnet publish (self-contained, win-x64) into artifacts\msix\layout
-  2. Copies packaging\AppxManifest.xml and generates placeholder logos
-  3. makeappx pack -> artifacts\msix\D2ChatTranslator_<version>_x64.msix
-  4. Signs the package only when -CertificateThumbprint is given
+  1. dotnet publish (self-contained, win-x64, deterministic CI build) into artifacts\msix\layout
+  2. Adds LICENSE, THIRD-PARTY-NOTICES.md and sbom.cdx.json (scripts\generate-sbom.ps1) to the layout
+  3. Copies packaging\AppxManifest.xml and generates placeholder logos
+  4. makeappx pack -> artifacts\msix\D2ChatTranslator_<version>_x64.msix
+  5. Signs the package when -CertificateThumbprint or -PfxPath is given
+  6. Writes the SHA-256 of the package next to it (<package>.sha256)
+
+  The manifest Publisher must equal the Subject of the signing certificate. When a certificate is
+  given and -Publisher is not, the Subject is read from the certificate.
 
   An unsigned package cannot be installed. For local development with package identity,
   register the layout folder instead (requires Developer Mode, which you enable yourself):
@@ -14,12 +19,16 @@
     Add-AppxPackage -Register artifacts\msix\layout\AppxManifest.xml
 
   This script never creates certificates, changes certificate trust, or changes Windows settings.
+  See docs/distribution.md for how to obtain and trust a signing certificate.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\package-msix.ps1
 
 .EXAMPLE
-  powershell -File scripts\package-msix.ps1 -Publisher "CN=Your Name" -CertificateThumbprint 0123ABCD...
+  powershell -File scripts\package-msix.ps1 -CertificateThumbprint 0123ABCD...
+
+.EXAMPLE
+  powershell -File scripts\package-msix.ps1 -PfxPath C:\keys\signing.pfx -PfxPassword (Read-Host -AsSecureString)
 #>
 param(
     [string] $Configuration = "Release",
@@ -27,7 +36,13 @@ param(
     [string] $Version = "0.1.0.0",
     # Must match the Subject of the signing certificate.
     [string] $Publisher = "CN=D2ChatTranslator Dev",
-    [string] $CertificateThumbprint
+    # A code signing certificate in Cert:\CurrentUser\My.
+    [string] $CertificateThumbprint,
+    # Or a PFX file with its password.
+    [string] $PfxPath,
+    [SecureString] $PfxPassword,
+    # RFC 3161 time stamp server. Pass "" to sign without a time stamp (the signature then expires with the certificate).
+    [string] $TimestampUrl = "http://timestamp.digicert.com"
 )
 
 $ErrorActionPreference = "Stop"
@@ -73,13 +88,42 @@ function New-Logo([string] $path, [int] $size) {
     }
 }
 
+function Get-PlainText([SecureString] $secure) {
+    if (-not $secure) { return "" }
+    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
+    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
+}
+
+if ($CertificateThumbprint -and $PfxPath) { throw "Pass either -CertificateThumbprint or -PfxPath, not both." }
+
+# The manifest Publisher must equal the certificate Subject
+if (-not $PSBoundParameters.ContainsKey('Publisher')) {
+    if ($CertificateThumbprint) {
+        $cert = Get-Item "Cert:\CurrentUser\My\$CertificateThumbprint" -ErrorAction Stop
+        $Publisher = $cert.Subject
+    }
+    elseif ($PfxPath) {
+        $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList (Resolve-Path $PfxPath).Path, (Get-PlainText $PfxPassword)
+        $Publisher = $cert.Subject
+        $cert.Dispose()
+    }
+}
+Write-Host "Publisher: $Publisher"
+
 if (Test-Path $layout) { Remove-Item $layout -Recurse -Force }
 New-Item -ItemType Directory -Force $assets | Out-Null
 
 Write-Host "Publishing ($Configuration, win-x64, self-contained)..."
+$plainVersion = $Version -replace '\.\d+$', ''
 dotnet publish (Join-Path $root "src\D2Translator.App\D2Translator.App.csproj") `
-    -c $Configuration -r win-x64 --self-contained true -o $layout -p:Version=$Version
+    -c $Configuration -r win-x64 --self-contained true -o $layout -p:Version=$plainVersion -p:ContinuousIntegrationBuild=true
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed." }
+
+# License, third-party notices and SBOM ship inside the package (specification 17.3)
+Copy-Item (Join-Path $root "LICENSE") (Join-Path $layout "LICENSE.txt")
+& (Join-Path $PSScriptRoot "generate-sbom.ps1") -PublishDir $layout -OutDir $layout -AppVersion $plainVersion
+Copy-Item (Join-Path $layout "THIRD-PARTY-NOTICES.md"), (Join-Path $layout "sbom.cdx.json") $outDir -Force
 
 $manifest = Get-Content (Join-Path $root "packaging\AppxManifest.xml") -Raw -Encoding UTF8
 $manifest = $manifest.Replace('$(Version)', $Version).Replace('$(Publisher)', [System.Security.SecurityElement]::Escape($Publisher))
@@ -94,13 +138,21 @@ Write-Host "Packing with $makeappx"
 & $makeappx pack /o /d $layout /p $msix
 if ($LASTEXITCODE -ne 0) { throw "makeappx pack failed." }
 
-if ($CertificateThumbprint) {
+if ($CertificateThumbprint -or $PfxPath) {
     $signtool = Find-SdkTool "signtool.exe"
-    & $signtool sign /fd SHA256 /sha1 $CertificateThumbprint /tr http://timestamp.digicert.com /td SHA256 $msix
+    $arguments = @("sign", "/fd", "SHA256")
+    if ($CertificateThumbprint) { $arguments += @("/sha1", $CertificateThumbprint) }
+    else { $arguments += @("/f", (Resolve-Path $PfxPath).Path, "/p", (Get-PlainText $PfxPassword)) }
+    if ($TimestampUrl) { $arguments += @("/tr", $TimestampUrl, "/td", "SHA256") }
+    & $signtool @arguments $msix
     if ($LASTEXITCODE -ne 0) { throw "signtool sign failed." }
     Write-Host "Signed: $msix"
 }
 else {
     Write-Host "Created unsigned package: $msix"
-    Write-Host "It cannot be installed until signed. See the script help for development registration."
+    Write-Host "It cannot be installed until signed. See docs/distribution.md."
 }
+
+$hash = (Get-FileHash $msix -Algorithm SHA256).Hash.ToLowerInvariant()
+[System.IO.File]::WriteAllText("$msix.sha256", "$hash  $(Split-Path $msix -Leaf)`n", (New-Object System.Text.UTF8Encoding $false))
+Write-Host "SHA-256: $hash"

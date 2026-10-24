@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using D2Translator.App.Services;
+using D2Translator.Application.Diagnostics;
 using D2Translator.Application.Reply;
 using D2Translator.Application.Translation;
 using D2Translator.Domain.Settings;
@@ -16,15 +17,20 @@ public sealed partial class ReplyViewModel : ObservableObject
     private readonly TranslationCoordinator _translator;
     private readonly IClipboardService _clipboard;
     private readonly AppSettingsService _settings;
+    private readonly IDiagnosticsSink _diagnostics;
+    private readonly TimeProvider _time;
     private readonly Func<string, bool> _confirm;
     private readonly ReplySession _session = new();
     private bool _syncing;
 
-    public ReplyViewModel(TranslationCoordinator translator, IClipboardService clipboard, AppSettingsService settings, Func<string, bool> confirm)
+    public ReplyViewModel(TranslationCoordinator translator, IClipboardService clipboard, AppSettingsService settings,
+        IDiagnosticsSink diagnostics, TimeProvider time, Func<string, bool> confirm)
     {
         _translator = translator;
         _clipboard = clipboard;
         _settings = settings;
+        _diagnostics = diagnostics;
+        _time = time;
         _confirm = confirm;
         Style = settings.Current.Send.Style;
         Draft = string.Empty;
@@ -117,9 +123,11 @@ public sealed partial class ReplyViewModel : ObservableObject
         IsBusy = true;
         int revision = _session.BeginTranslation();
         Status = "英訳しています…（API 利用料が生じ得ます）";
+        long started = _time.GetTimestamp();
+        bool withContext = UseContext && ContextAvailable;
         try
         {
-            ReplyTranslation result = await _translator.TranslateReplyAsync(_session.Draft, Style, UseContext && ContextAvailable, CancellationToken.None);
+            ReplyTranslation result = await _translator.TranslateReplyAsync(_session.Draft, Style, withContext, CancellationToken.None);
             if (!result.IsSuccess)
             {
                 _session.ApplyTranslation(revision, null);
@@ -131,6 +139,8 @@ public sealed partial class ReplyViewModel : ObservableObject
             {
                 SetCandidate(_session.Candidate);
                 Status = result.Problems.Count == 0 ? "英訳しました。必要なら直してからコピーしてください。" : "英訳しました（要確認）。";
+                // P03: 英訳の開始から候補の表示まで（仕様書 16.2）
+                _diagnostics.Latency(LatencyMetrics.ReplyCandidate, _time.GetElapsedTime(started), ("context", withContext ? "on" : "off"));
             }
             else
             {

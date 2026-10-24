@@ -95,6 +95,8 @@ public class ChatLineParserTests
 
     [Theory]
     [InlineData("ワァイアチ-ム]宛て: Need two more", "ファイアチーム", ChatChannel.Fireteam)]
+    [InlineData("ワァイアチーム]宛て. Need two more", "ファイアチーム", ChatChannel.Fireteam)]
+    [InlineData("[ファイアチーム]宛て•. Need two more", "ファイアチーム", ChatChannel.Fireteam)]
     [InlineData("[ファイアデアム]宛て: Need two more", "ファイアチーム", ChatChannel.Fireteam)]
     [InlineData("To ファイアチーム検索機能]: Need two more", "ファイアチーム検索機能", ChatChannel.FireteamFinder)]
     [InlineData("[レイド]宛て: Need two more", "レイド", ChatChannel.Other)]

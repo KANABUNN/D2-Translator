@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        xmlns:p="clr-namespace:D2Translator.App.Presentation"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="D2 Chat Translator"
@@ -33,18 +34,20 @@
       <TextBlock Style="{StaticResource StatusValue}" Text="{Binding DisplayModeText}" />
     </WrapPanel>
 
+    <!-- 主要操作はキーボードだけでも使えるよう、アクセスキー（Alt + 文字）を付ける（仕様書 17.2） -->
     <WrapPanel Grid.Row="1" Margin="0,0,0,12">
-      <Button Content="対象を選択…" Command="{Binding SelectTargetCommand}" Margin="0,0,8,4" />
-      <Button Content="ROI 調整…" Command="{Binding CalibrateCommand}" Margin="0,0,8,4" />
-      <Button Content="開始" Command="{Binding StartCommand}" Margin="0,0,8,4" />
-      <Button Content="停止" Command="{Binding StopCommand}" Margin="0,0,16,4" />
-      <Button Content="返信…" Command="{Binding OpenReplyCommand}" Margin="0,0,8,4" />
-      <Button Content="表示切替" Command="{Binding ToggleDisplayModeCommand}" Margin="0,0,8,4"
+      <Button Content="対象を選択(_T)…" Command="{Binding SelectTargetCommand}" Margin="0,0,8,4" />
+      <Button Content="ROI 調整(_R)…" Command="{Binding CalibrateCommand}" Margin="0,0,8,4" />
+      <Button Content="開始(_S)" Command="{Binding StartCommand}" Margin="0,0,8,4" />
+      <Button Content="停止(_P)" Command="{Binding StopCommand}" Margin="0,0,16,4" />
+      <Button Content="返信(_J)…" Command="{Binding OpenReplyCommand}" Margin="0,0,8,4" />
+      <Button Content="表示切替(_O)" Command="{Binding ToggleDisplayModeCommand}" Margin="0,0,8,4"
               ToolTip="独立ウィンドウとオーバーレイを切り替えます（Ctrl+Alt+O）" />
-      <Button Content="オーバーレイ配置…" Command="{Binding BeginPlacementEditCommand}" Margin="0,0,8,4"
+      <Button Content="オーバーレイ配置(_L)…" Command="{Binding BeginPlacementEditCommand}" Margin="0,0,8,4"
               ToolTip="オーバーレイをドラッグで移動します。Esc か、もう一度押すと終了します" />
-      <Button Content="設定…" Command="{Binding OpenSettingsCommand}" Margin="0,0,8,4" />
-      <TextBlock Text="{Binding WaitingText}" VerticalAlignment="Center" FontWeight="SemiBold" />
+      <Button Content="設定(_E)…" Command="{Binding OpenSettingsCommand}" Margin="0,0,8,4" />
+      <TextBlock Text="{Binding WaitingText}" VerticalAlignment="Center" FontWeight="SemiBold"
+                 p:LiveRegion.Setting="Polite" />
     </WrapPanel>
 
     <Border Grid.Row="2" Margin="0,0,0,12" Padding="10,8" BorderThickness="1"
@@ -58,7 +61,7 @@
           </Style.Triggers>
         </Style>
       </Border.Style>
-      <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" AutomationProperties.Name="通知" />
+      <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" AutomationProperties.Name="通知" p:LiveRegion.Setting="Assertive" />
     </Border>
 
     <Grid Grid.Row="3">
@@ -74,6 +77,11 @@
                    Text="他プレイヤーの発言は、クラウド翻訳が有効なら GPT-6 Luna で日本語に翻訳します。参加通知などのシステム表示と自分の発言は翻訳せず、システム表示は履歴にも表示しません。" />
         <ListBox x:Name="MessageList" ItemsSource="{Binding Messages}" AutomationProperties.Name="受信履歴"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+              <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+            </Style>
+          </ListBox.ItemContainerStyle>
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid Margin="0,4">

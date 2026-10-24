@@ -81,6 +81,12 @@ internal sealed class TestWindowHost : IDisposable
 
     public void Close() => _dispatcher?.Invoke(() => _window?.Close());
 
+    public void Resize(double width, double height) => _dispatcher?.Invoke(() =>
+    {
+        _window!.Width = width;
+        _window.Height = height;
+    });
+
     /// <summary>ウィンドウのスレッド（メッセージループあり）で実行する。</summary>
     public T Invoke<T>(Func<T> action) => _dispatcher!.Invoke(action);
 

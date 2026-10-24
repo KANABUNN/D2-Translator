@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="D2Translator.Capture.Windows.Tests" />
+    <!-- 耐久試験で自プロセスの試験ウィンドウだけを取得するため（WgcCaptureTarget.CreateForWindow） -->
+    <InternalsVisibleTo Include="D2Translator.Eval" />
   </ItemGroup>
 
   <ItemGroup>

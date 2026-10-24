@@ -1,13 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- 開発用の評価ツール。OCR の文字誤り率（P05）と、翻訳品質の採点用 TSV（P08、P09） -->
+  <!--
+    開発用の評価ツール。OCR の文字誤り率（P05）、翻訳品質の採点用 TSV（P08、P09）、
+    診断記録の集計（P01〜P04、P10〜P14）、ゲームなしの耐久試験
+  -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
     <RootNamespace>D2Translator.Eval</RootNamespace>
+    <!-- 耐久試験の模擬チャット画面 -->
+    <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <!-- WPF を使うと暗黙の using から外れるため戻す -->
   <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\D2Translator.Capture.Windows\D2Translator.Capture.Windows.csproj" />
     <ProjectReference Include="..\..\src\D2Translator.DictionaryContext\D2Translator.DictionaryContext.csproj" />
     <ProjectReference Include="..\..\src\D2Translator.Infrastructure\D2Translator.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\D2Translator.Ocr.Windows\D2Translator.Ocr.Windows.csproj" />

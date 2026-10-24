@@ -31,3 +31,17 @@ jobs:
       # 英語 OCR の言語機能がない環境では OCR の結合試験はスキップになる
       - name: Test
         run: dotnet test D2Translator.slnx --no-build -c Release
+
+      # 未署名の MSIX、SBOM、第三者通知を作る（仕様書 17.3）。署名は利用者の証明書で行う（決定 D30）
+      - name: Package (unsigned)
+        run: powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: msix-unsigned
+          retention-days: 14
+          path: |
+            artifacts/msix/*.msix
+            artifacts/msix/*.sha256
+            artifacts/msix/sbom.cdx.json
+            artifacts/msix/THIRD-PARTY-NOTICES.md

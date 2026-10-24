@@ -14,6 +14,12 @@ public sealed class CaptureController : IAsyncDisposable
     /// <summary>これ以上フレームが届かなければ待機中として表示する（最小化等）。</summary>
     public static readonly TimeSpan FrameStallThreshold = TimeSpan.FromSeconds(3);
 
+    /// <summary>GPU デバイスの喪失から続けて取得を作り直す回数（仕様書 17.1）。超えたら停止する。</summary>
+    public const int MaxRecoveryAttempts = 3;
+
+    /// <summary>作り直した取得がこの時間続いたら、復旧の回数を数え直す。</summary>
+    public static readonly TimeSpan RecoveryResetAfter = TimeSpan.FromSeconds(60);
+
     private readonly ReceivePipeline _pipeline;
     private readonly TimeProvider _time;
     private readonly ILogger<CaptureController> _logger;
@@ -42,6 +48,9 @@ public sealed class CaptureController : IAsyncDisposable
     public CaptureProfile? Profile { get; private set; }
 
     public bool IsWaitingForFrames => _isWaitingForFrames;
+
+    /// <summary>復旧の 1 回目の待ち時間。n 回目は n 倍待つ。</summary>
+    public TimeSpan RecoveryDelay { get; init; } = TimeSpan.FromSeconds(1);
 
     public event EventHandler<OcrObservation>? ObservationReady;
 
@@ -126,10 +135,10 @@ public sealed class CaptureController : IAsyncDisposable
             _pipeline.Resync();
 
             var cts = new CancellationTokenSource();
-            ICaptureSource source = Target.CreateSource();
+            ICaptureTarget target = Target;
             var request = new CaptureRequest(Profile, framesPerSecond);
             _runCts = cts;
-            _runTask = Task.Run(() => RunAsync(source, request, cts.Token));
+            _runTask = Task.Run(() => RunAsync(target, request, cts.Token));
         }
     }
 
@@ -149,15 +158,12 @@ public sealed class CaptureController : IAsyncDisposable
         }
     }
 
-    private async Task RunAsync(ICaptureSource source, CaptureRequest request, CancellationToken ct)
+    private async Task RunAsync(ICaptureTarget target, CaptureRequest request, CancellationToken ct)
     {
         (CaptureState next, ErrorCode? reason) outcome = (CaptureState.Paused, null);
         try
         {
-            await using (source.ConfigureAwait(false))
-            {
-                await _pipeline.RunAsync(source, request, ct).ConfigureAwait(false);
-            }
+            await RunWithRecoveryAsync(target, request, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -195,7 +201,54 @@ public sealed class CaptureController : IAsyncDisposable
             Target = null;
         }
 
-        StateMachine.TryTransition(outcome.next, outcome.reason);
+        // 復旧の待機中に停止した場合は Paused へ移れないため、開始できる状態へ戻す
+        if (!StateMachine.TryTransition(outcome.next, outcome.reason) && outcome.next == CaptureState.Paused)
+        {
+            StateMachine.TryTransition(CaptureState.Ready);
+        }
+    }
+
+    /// <summary>
+    /// GPU デバイスを失ったら取得を破棄して作り直す（仕様書 17.1）。
+    /// 続けて <see cref="MaxRecoveryAttempts"/> 回失敗したら例外をそのまま返し、停止させる。
+    /// </summary>
+    private async Task RunWithRecoveryAsync(ICaptureTarget target, CaptureRequest request, CancellationToken ct)
+    {
+        int attempts = 0;
+        while (true)
+        {
+            long started = _time.GetTimestamp();
+            try
+            {
+                ICaptureSource source = target.CreateSource();
+                await using (source.ConfigureAwait(false))
+                {
+                    await _pipeline.RunAsync(source, request, ct).ConfigureAwait(false);
+                }
+
+                return;
+            }
+            catch (CaptureException ex) when (ex.Kind == CaptureFailureKind.DeviceLost && !ct.IsCancellationRequested)
+            {
+                if (_time.GetElapsedTime(started) >= RecoveryResetAfter)
+                {
+                    attempts = 0;
+                }
+
+                if (++attempts > MaxRecoveryAttempts)
+                {
+                    throw;
+                }
+
+                _logger.LogWarning("Capture device lost; recovery attempt {Attempt} of {Max}", attempts, MaxRecoveryAttempts);
+                StateMachine.Transition(CaptureState.Recovering);
+            }
+
+            await Task.Delay(RecoveryDelay * attempts, _time, ct).ConfigureAwait(false);
+            StateMachine.Transition(CaptureState.Ready);
+            StateMachine.Transition(CaptureState.Running);
+            _pipeline.Resync();
+        }
     }
 
     private void OnStatsUpdated(object? sender, PipelineStats stats)
