@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 仕様書 5.2: Domain は WPF と外部 SDK に依存しない -->
+  <PropertyGroup>
+    <TargetFramework>$(PortableTargetFramework)</TargetFramework>
+    <RootNamespace>D2Translator.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>
