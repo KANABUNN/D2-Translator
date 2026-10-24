@@ -66,6 +66,21 @@ public class ChatLineParserTests
     }
 
     [Fact]
+    public void Join_notice_with_the_hash_misread_as_a_space_is_not_joined_to_a_long_message()
+    {
+        // 名前の # が空白に読まれた参加通知が、直前の長い発言の折り返しとして連結されていた（Phase 5 の耐久試験）
+        IReadOnlyList<ChatCandidate> candidates = Parser.Parse(
+        [
+            Row(0, "[Kestrel#5678]: kwtd please, we are on the last encounter 144", width: 460),
+            Row(1, "Moonii 2468がチームチャットに参加しました。"),
+        ], Roi);
+
+        Assert.Equal(2, candidates.Count);
+        Assert.Equal("kwtd please, we are on the last encounter 144", candidates[0].Body);
+        Assert.Equal((ChatLineKind.System, "Moonii 2468"), (candidates[1].Kind, candidates[1].Speaker));
+    }
+
+    [Fact]
     public void Fireteam_finder_channel_is_recognized()
     {
         IReadOnlyList<ChatCandidate> candidates = Parser.Parse([Row(0, "To [ファイアチーム検索機能]: C")], Roi);

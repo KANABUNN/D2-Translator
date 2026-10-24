@@ -80,8 +80,8 @@ public sealed class ChatFormat
         SpeakerNoticePatterns =
         [
             Pattern(@"^(?<speaker>[^\s\[\]]{1,40}#[^\s\[\]]{0,10}?)\s*が"),
-            // # を読み落としても、英字の名前の直後に「が」が続く行は通知とみなす
-            Pattern(@"^(?<speaker>[A-Za-z0-9_.\-]{2,40})\s*が"),
+            // # を読み落としても、英字の名前（と空白で離れた識別番号）の直後に「が」が続く行は通知とみなす（例: Moonii 2468が）
+            Pattern(@"^(?<speaker>[A-Za-z0-9_.\-]{2,40}(?:\s\d{2,6})?)\s*が"),
         ],
         ChannelLabels = new Dictionary<string, ChatChannel>(StringComparer.Ordinal)
         {
