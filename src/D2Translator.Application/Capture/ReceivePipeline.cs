@@ -1,3 +1,4 @@
+using D2Translator.Application.Chat;
 using D2Translator.Application.Ocr;
 using D2Translator.Domain.Capture;
 using D2Translator.Domain.Geometry;
@@ -27,11 +28,20 @@ public sealed class RoiReconfigurationRequiredException(RoiCheckStatus status)
 /// 受信フローの取得から OCR まで（仕様書 15.1 の 2〜3）。
 /// フレームの待ち行列は取得側で最新1件、OCR の同時実行は1件。
 /// </summary>
-public sealed class ReceivePipeline(IOcrRecognizer ocr, TimeProvider time, ILogger<ReceivePipeline> logger)
+public sealed class ReceivePipeline(IOcrRecognizer ocr, ChatFeed feed, TimeProvider time, ILogger<ReceivePipeline> logger)
 {
     public event EventHandler<OcrObservation>? ObservationReady;
 
     public event EventHandler<PipelineStats>? StatsUpdated;
+
+    /// <summary>取得対象の変更。行追跡の基準と話者の対応表を捨てる。</summary>
+    public void ResetSession(Guid sessionId) => feed.Reset(sessionId);
+
+    /// <summary>停止からの再開。見えている発言を新着として扱わない。</summary>
+    public void Resync() => feed.Resync();
+
+    /// <summary>フレームが届かない間も、確定待ちの発言を時間で要確認へ進める。</summary>
+    public void Tick() => feed.Tick(time.GetTimestamp());
 
     public async Task RunAsync(ICaptureSource source, CaptureRequest request, CancellationToken ct)
     {
@@ -60,6 +70,8 @@ public sealed class ReceivePipeline(IOcrRecognizer ocr, TimeProvider time, ILogg
                 if (previousPixels is not null && previousPixels.AsSpan().SequenceEqual(pixels))
                 {
                     skipped++;
+                    // 画面が同じなら前回の読みをもう一度見たことになり、確定の判定を進められる
+                    feed.OnUnchanged(frame.Timestamp);
                 }
                 else
                 {
@@ -76,7 +88,9 @@ public sealed class ReceivePipeline(IOcrRecognizer ocr, TimeProvider time, ILogg
                     ocrRuns++;
                     totalOcr += elapsed;
                     lastOcr = elapsed;
-                    ObservationReady?.Invoke(this, observation with { OcrDuration = elapsed });
+                    observation = observation with { OcrDuration = elapsed };
+                    ObservationReady?.Invoke(this, observation);
+                    feed.OnObservation(observation, frame.Timestamp);
                 }
 
                 StatsUpdated?.Invoke(this, new PipelineStats(

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 仕様書 5.2 Dictionary Context: 辞書照合、活動別語義、用語保護。外部依存なし -->
+  <PropertyGroup>
+    <TargetFramework>$(PortableTargetFramework)</TargetFramework>
+    <RootNamespace>D2Translator.DictionaryContext</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data\glossary-example.json" LogicalName="glossary-example.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
+    <ProjectReference Include="..\D2Translator.TextTracking\D2Translator.TextTracking.csproj" />
+  </ItemGroup>
+
+</Project>

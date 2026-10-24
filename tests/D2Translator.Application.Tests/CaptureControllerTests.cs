@@ -11,7 +11,7 @@ public class CaptureControllerTests
     private static readonly PixelSize Fhd = TestProfiles.Fhd;
 
     private static CaptureController NewController() => new(
-        new ReceivePipeline(new FakeOcr(), TimeProvider.System, NullLogger<ReceivePipeline>.Instance),
+        TestPipelines.NewPipeline(new FakeOcr()),
         TimeProvider.System,
         NullLogger<CaptureController>.Instance);
 

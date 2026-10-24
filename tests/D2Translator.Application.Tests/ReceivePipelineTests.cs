@@ -14,7 +14,7 @@ public class ReceivePipelineTests
     public async Task Unchanged_frames_skip_ocr()
     {
         var ocr = new FakeOcr();
-        var pipeline = new ReceivePipeline(ocr, TimeProvider.System, NullLogger<ReceivePipeline>.Instance);
+        var pipeline = TestPipelines.NewPipeline(ocr);
         var observations = new List<OcrObservation>();
         PipelineStats? last = null;
         pipeline.ObservationReady += (_, o) => observations.Add(o);
@@ -35,7 +35,7 @@ public class ReceivePipelineTests
     [Fact]
     public async Task Ocr_positions_are_in_frame_coordinates()
     {
-        var pipeline = new ReceivePipeline(new FakeOcr(), TimeProvider.System, NullLogger<ReceivePipeline>.Instance);
+        var pipeline = TestPipelines.NewPipeline(new FakeOcr());
         OcrObservation? observation = null;
         pipeline.ObservationReady += (_, o) => observation = o;
         CaptureProfile profile = TestProfiles.ChatArea();
@@ -49,7 +49,7 @@ public class ReceivePipelineTests
     public async Task Changed_aspect_ratio_stops_with_reconfiguration()
     {
         var ocr = new FakeOcr();
-        var pipeline = new ReceivePipeline(ocr, TimeProvider.System, NullLogger<ReceivePipeline>.Instance);
+        var pipeline = TestPipelines.NewPipeline(ocr);
         var source = new FakeCaptureSource([new(Fhd, 1), new(new PixelSize(2560, 1080), 2)]);
 
         var ex = await Assert.ThrowsAsync<RoiReconfigurationRequiredException>(() =>
@@ -62,7 +62,7 @@ public class ReceivePipelineTests
     [Fact]
     public async Task Cancellation_stops_the_loop()
     {
-        var pipeline = new ReceivePipeline(new FakeOcr(), TimeProvider.System, NullLogger<ReceivePipeline>.Instance);
+        var pipeline = TestPipelines.NewPipeline(new FakeOcr());
         using var cts = new CancellationTokenSource();
         pipeline.ObservationReady += (_, _) => cts.Cancel();
         var source = new FakeCaptureSource([new(Fhd, 1), new(Fhd, 2), new(Fhd, 3)]);

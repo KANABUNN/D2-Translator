@@ -4,7 +4,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 
 ゲーム画面に表示された英語チャットを OS の画面取得と端末内 OCR で読み取り、日本語で表示します。日本語の返信を英訳し、利用者が確認してコピーできます。ゲームへの貼り付けと送信は利用者自身が行います。
 
-> **状態: 開発中（Phase 1 実装済み・実機検証待ち）** — 画面取得、ROI 調整、OCR の技術検証版です。翻訳はまだ行いません。
+> **状態: 開発中（Phase 2 実装済み）** — 画面取得、OCR、発言の追跡、D2 辞書の注釈まで動きます。翻訳はまだ行いません（Phase 3）。
 
 ## 仕様と記録
 
@@ -12,6 +12,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 - [決定記録（D09 以降）](docs/decisions.md)
 - [Phase 0 版固定表](docs/phase0/version-pinning.md)
 - [Phase 1 技術検証記録](docs/phase1/verification.md)
+- [Phase 2 実施記録](docs/phase2/report.md)
 
 主な設計方針:
 
@@ -19,7 +20,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 | --- | --- |
 | 表示 | C方式（非侵入型オーバーレイと独立ウィンドウの切替） |
 | 画面取得 | Windows Graphics Capture。利用者がシステムの選択 UI で選んだウィンドウまたはモニターのみ |
-| OCR | Windows.Media.Ocr（端末内） |
+| OCR | Windows.Media.Ocr（端末内）。英語と日本語（ゲーム表示）の2言語で認識して行を組み立てる |
 | AI 翻訳 | OpenAI Responses API、モデル `gpt-6-luna` 固定、`reasoning.effort = none` 固定 |
 | ゲームへの介入 | なし（コード挿入、メモリ読み書き、入力生成、パケット解析を行わない） |
 
@@ -31,8 +32,11 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 | `src/D2Translator.Domain` | 座標、ROI 規則、状態遷移、設定と検証、エラーコード、固定 AI プロファイル。外部依存なし |
 | `src/D2Translator.Application` | 取得・OCR の境界定義、受信パイプライン、取得の状態管理 |
 | `src/D2Translator.Capture.Windows` | Windows Graphics Capture と D3D11 による ROI 切出し |
-| `src/D2Translator.Ocr.Windows` | Windows.Media.Ocr の呼出しと結果の変換 |
+| `src/D2Translator.Ocr.Windows` | Windows.Media.Ocr の呼出し、前処理、2言語の結果の合成 |
+| `src/D2Translator.TextTracking` | 行の組み立て、行の解析、発言の追跡、話者の一時 ID、文字誤り率 |
+| `src/D2Translator.DictionaryContext` | D2 辞書の検証付き読み込みと照合 |
 | `src/D2Translator.Infrastructure` | 保存先の解決、検証付き JSON の原子的な保存 |
+| `tools/D2Translator.Eval` | 正解付き画像で OCR の文字誤り率を測る開発用ツール |
 
 ## ビルドと試験
 
@@ -54,6 +58,12 @@ OCR の結合試験は OS の英語 OCR 言語機能を使います。インス�
 dotnet run --project src/D2Translator.App
 ```
 
+OCR の評価（画像と同名の .txt に正解を書く。評価画像は他プレイヤーの名前が写るため `eval-data/` に置き、コミットしない）:
+
+```bash
+dotnet run --project tools/D2Translator.Eval -- eval-data
+```
+
 MSIX パッケージの作成（署名は証明書の拇印を渡した場合のみ。スクリプトは証明書の作成や OS 設定の変更を行いません）:
 
 ```bash
@@ -72,5 +82,6 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | --- | --- |
 | Phase 0 基盤、版固定、WGC と OCR | 完了（WPF と MSIX の試作は Phase 1 で実施、D11） |
 | Phase 1 キャプチャ、ROI、独立表示 | 実装済み。D2 実機で取得を確認。日本語クライアントの行頭表示は Phase 2 で対応（[記録](docs/phase1/verification.md)） |
-| Phase 2 OCR、行追跡、辞書注釈 | 未着手 |
-| Phase 3〜6 | 未着手 |
+| Phase 2 OCR、行追跡、辞書注釈 | 実装済み。受入評価用の画像の収集と、実機での追跡確認が残る（[記録](docs/phase2/report.md)） |
+| Phase 3 辞書、文脈、GPT-6 Luna 接続 | 未着手 |
+| Phase 4〜6 | 未着手 |

@@ -80,6 +80,8 @@ public sealed class CaptureController : IAsyncDisposable
         ArgumentNullException.ThrowIfNull(target);
         Target?.Dispose();
         Target = target;
+        // 対象を変えたら追跡基準を更新し、過去ログの一斉再送を防ぐ（仕様書 8.3）
+        _pipeline.ResetSession(Guid.NewGuid());
         StateMachine.Transition(CaptureState.Calibrating);
     }
 
@@ -121,6 +123,7 @@ public sealed class CaptureController : IAsyncDisposable
             StateMachine.Transition(CaptureState.Running);
             _lastFrameTimestamp = _time.GetTimestamp();
             SetWaiting(false);
+            _pipeline.Resync();
 
             var cts = new CancellationTokenSource();
             ICaptureSource source = Target.CreateSource();
@@ -209,6 +212,7 @@ public sealed class CaptureController : IAsyncDisposable
             return;
         }
 
+        _pipeline.Tick();
         TimeSpan sinceLast = _time.GetElapsedTime(Volatile.Read(ref _lastFrameTimestamp));
         if (sinceLast > FrameStallThreshold)
         {

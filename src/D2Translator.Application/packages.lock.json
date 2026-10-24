@@ -16,8 +16,21 @@
         "resolved": "10.0.12",
         "contentHash": "9/qymSh7hVDMGTGwrLz8MRp5zRyXy9adGDOs4HwRdnLil3oZGYuWeZjbmHgCQ9BL1qBroVfgUK3U/nb61617Cw=="
       },
+      "d2translator.dictionarycontext": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Domain": "[0.1.0, )",
+          "D2Translator.TextTracking": "[0.1.0, )"
+        }
+      },
       "d2translator.domain": {
         "type": "Project"
+      },
+      "d2translator.texttracking": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Domain": "[0.1.0, )"
+        }
       }
     },
     "net10.0/win-x64": {}

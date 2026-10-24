@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 仕様書 16.3 P05 の文字誤り率を、正解付きの静止画像で測る開発用ツール -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <RootNamespace>D2Translator.Eval</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\D2Translator.Ocr.Windows\D2Translator.Ocr.Windows.csproj" />
+    <ProjectReference Include="..\..\src\D2Translator.TextTracking\D2Translator.TextTracking.csproj" />
+  </ItemGroup>
+
+</Project>

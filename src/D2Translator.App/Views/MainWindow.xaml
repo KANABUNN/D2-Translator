@@ -66,19 +66,50 @@
       </Grid.ColumnDefinitions>
 
       <DockPanel Grid.Column="0">
-        <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionHeader}" Text="認識結果（最新の観測）" />
-        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Text="{Binding LastObservationText}"
-                   Style="{StaticResource StatusLabel}" />
+        <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionHeader}" Text="受信履歴" />
         <TextBlock DockPanel.Dock="Bottom" Margin="0,6,0,0" TextWrapping="Wrap" Style="{StaticResource StatusLabel}"
-                   Text="Phase 1 の技術検証表示です。行の追跡、メッセージの確定、翻訳はまだ行いません。" />
-        <ListBox ItemsSource="{Binding Lines}" AutomationProperties.Name="認識した行"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                   Text="翻訳は Phase 3 で実装します。現在は原文と、D2 辞書・話者名の注釈だけを表示します。" />
+        <ListBox x:Name="MessageList" ItemsSource="{Binding Messages}" AutomationProperties.Name="受信履歴"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
           <ListBox.ItemTemplate>
             <DataTemplate>
-              <StackPanel Margin="0,2">
-                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15" />
-                <TextBlock Text="{Binding Bounds}" Style="{StaticResource StatusLabel}" FontSize="11" />
-              </StackPanel>
+              <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding Time}" Style="{StaticResource StatusLabel}" Margin="0,2,10,0" />
+                <StackPanel Grid.Column="1">
+                  <WrapPanel>
+                    <TextBlock Text="{Binding Header}" FontWeight="SemiBold" Margin="0,0,10,0" />
+                    <TextBlock Text="{Binding Status}" Style="{StaticResource StatusLabel}" />
+                  </WrapPanel>
+                  <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsSystem}" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" />
+                            <Setter Property="FontSize" Value="13" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <TextBlock Text="{Binding Annotations}" TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0"
+                             Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding HasAnnotations}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </StackPanel>
+              </Grid>
             </DataTemplate>
           </ListBox.ItemTemplate>
         </ListBox>
@@ -88,6 +119,17 @@
         <StackPanel>
           <TextBlock Style="{StaticResource SectionHeader}" Text="診断" />
           <TextBlock Text="{Binding StatsText}" TextWrapping="Wrap" Margin="0,0,0,12" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="最新の観測（組み立てた行）" />
+          <TextBlock Text="{Binding LastObservationText}" TextWrapping="Wrap" FontSize="11" Style="{StaticResource StatusLabel}" />
+          <ItemsControl ItemsSource="{Binding Lines}" Margin="0,2,0,12" AutomationProperties.Name="最新の観測">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="12" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Style="{StaticResource StatusLabel}" Text="D2 辞書" />
+          <TextBlock Text="{Binding GlossaryText}" TextWrapping="Wrap" Margin="0,0,0,8" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="OCR" />
           <TextBlock Text="{Binding OcrText}" TextWrapping="Wrap" Margin="0,0,0,8" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="パッケージ識別情報" />

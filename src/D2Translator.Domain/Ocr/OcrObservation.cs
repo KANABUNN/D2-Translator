@@ -26,6 +26,9 @@ public sealed record OcrObservation
 
     public required DateTimeOffset CapturedAt { get; init; }
 
+    /// <summary>取得画像全体の中での ROI の位置。折り返しの判定に使う。</summary>
+    public PixelRect RoiBounds { get; init; }
+
     public required IReadOnlyList<OcrLine> Lines { get; init; }
 
     /// <summary>行追跡で算出する（Phase 2）。未算出なら null。</summary>

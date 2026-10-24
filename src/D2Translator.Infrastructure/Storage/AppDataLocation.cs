@@ -22,6 +22,8 @@ public sealed class AppDataLocation
 
     public string CaptureProfilesPath => Path.Combine(RootDirectory, "capture-profiles.json");
 
+    public string UserGlossaryPath => Path.Combine(RootDirectory, "glossary-user.json");
+
     public static AppDataLocation Resolve()
     {
         if (TryGetPackagedLocalFolder() is string packaged)

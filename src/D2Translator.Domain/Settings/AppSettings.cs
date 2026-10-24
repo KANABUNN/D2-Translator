@@ -83,7 +83,27 @@ public sealed record CaptureSettings
 
 public sealed record OcrSettings
 {
+    /// <summary>チャット本文（英語）の認識言語。</summary>
     public string Language { get; init; } = "en-US";
+
+    /// <summary>
+    /// ゲームの表示言語。行頭のチャンネル表示やシステムメッセージに使われる。
+    /// 本文と異なる場合は両方の言語で認識して合成する。null なら本文の言語だけで認識する。
+    /// </summary>
+    public string? ClientLanguage { get; init; } = "ja";
+
+    public OcrPreprocessingSettings Preprocessing { get; init; } = new();
+}
+
+/// <summary>仕様書 8.1 の前処理。版付きで保存する。</summary>
+public sealed record OcrPreprocessingSettings
+{
+    public const int CurrentVersion = 1;
+
+    public int Version { get; init; } = CurrentVersion;
+
+    /// <summary>OCR 前の拡大倍率。小さいチャット文字の認識を安定させる。</summary>
+    public int Scale { get; init; } = 2;
 }
 
 public sealed record TranslationSettings

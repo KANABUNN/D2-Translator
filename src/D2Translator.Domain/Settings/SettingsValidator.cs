@@ -36,6 +36,18 @@ public static class SettingsValidator
             issues.Add(new("ocr.language", "言語タグが空です。"));
         }
 
+        if (settings.Ocr.ClientLanguage is { } clientLanguage && string.IsNullOrWhiteSpace(clientLanguage))
+        {
+            issues.Add(new("ocr.clientLanguage", "言語タグが空です。使わない場合は null にします。"));
+        }
+
+        if (settings.Ocr.Preprocessing.Version != OcrPreprocessingSettings.CurrentVersion)
+        {
+            issues.Add(new("ocr.preprocessing.version", $"未対応の版です: {settings.Ocr.Preprocessing.Version}"));
+        }
+
+        Range(issues, "ocr.preprocessing.scale", settings.Ocr.Preprocessing.Scale, 1, 3);
+
         TranslationSettings translation = settings.Translation;
         Fixed(issues, "translation.providerId", translation.ProviderId, OpenAIFixedProfile.ProviderId);
         Fixed(issues, "translation.modelId", translation.ModelId, OpenAIFixedProfile.ModelId);

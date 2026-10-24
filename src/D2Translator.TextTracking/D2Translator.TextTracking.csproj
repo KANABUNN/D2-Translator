@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- 仕様書 5.2 Text Tracking: 行の対応付け、折返し結合、重複抑制、品質判定。外部依存なし -->
+  <PropertyGroup>
+    <TargetFramework>$(PortableTargetFramework)</TargetFramework>
+    <RootNamespace>D2Translator.TextTracking</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

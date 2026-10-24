@@ -3,8 +3,12 @@ using D2Translator.App.Services;
 using D2Translator.App.ViewModels;
 using D2Translator.App.Views;
 using D2Translator.Application.Capture;
+using D2Translator.Application.Chat;
 using D2Translator.Application.Ocr;
 using D2Translator.Infrastructure.Storage;
+using D2Translator.TextTracking.Parsing;
+using D2Translator.TextTracking.Speakers;
+using D2Translator.TextTracking.Tracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -60,9 +64,21 @@ public partial class App : System.Windows.Application
         services.AddSingleton(sp => sp.GetRequiredService<SettingsRepository>().Load());
         services.AddSingleton<CaptureProfileRepository>();
         services.AddSingleton(sp => OcrRuntime.Create(
-            sp.GetRequiredService<SettingsLoadResult>().Settings.Ocr.Language,
+            sp.GetRequiredService<SettingsLoadResult>().Settings.Ocr,
             sp.GetRequiredService<TimeProvider>()));
-        services.AddSingleton(sp => sp.GetRequiredService<OcrRuntime>().Recognizer ?? new UnavailableOcrRecognizer());
+        services.AddSingleton<IOcrRecognizer>(sp => (IOcrRecognizer?)sp.GetRequiredService<OcrRuntime>().Recognizer ?? new UnavailableOcrRecognizer());
+        services.AddSingleton(sp => GlossaryRuntime.Load(sp.GetRequiredService<AppDataLocation>()));
+        services.AddSingleton(_ => new ChatLineParser(ChatFormat.JapaneseClient));
+        services.AddSingleton(sp => new MessageTracker(sp.GetRequiredService<TimeProvider>()));
+        services.AddSingleton<SpeakerRegistry>();
+        services.AddSingleton(sp => new ChatFeed(
+            sp.GetRequiredService<ChatLineParser>(),
+            sp.GetRequiredService<MessageTracker>(),
+            sp.GetRequiredService<SpeakerRegistry>(),
+            sp.GetRequiredService<GlossaryRuntime>().Matcher)
+        {
+            Activity = sp.GetRequiredService<SettingsLoadResult>().Settings.Context.Activity,
+        });
         services.AddSingleton<ReceivePipeline>();
         services.AddSingleton<CaptureController>();
         services.AddSingleton<IDialogService, DialogService>();

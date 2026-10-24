@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "dictionaryVersion": "example-2026-10-24",
+  "entries": [
+    {
+      "termId": "d2.lfg.kwtd",
+      "senseId": "recruitment",
+      "source": "KWTD",
+      "target": "手順を理解していること",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["KWTD please"],
+      "note": "募集文の参加条件。初心者歓迎とは訳さない",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.lfg.lfnm",
+      "senseId": "recruitment",
+      "source": "LF{n}M",
+      "target": "あと{n}人募集",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["LF2M raid"],
+      "note": "数字を保持し、募集人数として解釈する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.combat.adds",
+      "senseId": "enemies",
+      "source": "adds",
+      "target": "雑魚敵",
+      "aliases": ["ads"],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["clear adds"],
+      "note": "広告の意味もあり、ゲーム文脈で確認する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.combat.wipe",
+      "senseId": "party-death",
+      "source": "wipe",
+      "target": "全滅してやり直す",
+      "aliases": ["wiped"],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["we wiped"],
+      "note": "汚れを拭く等の一般語義と区別する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.combat.rez",
+      "senseId": "revive",
+      "source": "rez",
+      "target": "蘇生",
+      "aliases": ["res"],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["can someone rez me"],
+      "note": "依頼、可能回数、否定の有無を保持する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.combat.dps",
+      "senseId": "damage",
+      "source": "DPS",
+      "target": "火力",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["my dps is low"],
+      "note": "数値の話とフェーズ開始の指示を分ける",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.combat.dps",
+      "senseId": "damage-phase",
+      "source": "DPS",
+      "target": "攻撃フェーズ",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["dps now"],
+      "note": "数値の話とフェーズ開始の指示を分ける",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.subclass.well",
+      "senseId": "super",
+      "source": "Well of Radiance",
+      "target": "輝く泉",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["I'm on Well of Radiance"],
+      "note": "単独の well は一般語の可能性が高いため、正式名のみを照合する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.weapon.div",
+      "senseId": "divinity",
+      "source": "div",
+      "target": "神性（Divinity）の略称候補",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["who has div"],
+      "note": "武器の話で確認できた場合に限る",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.chat.gg",
+      "senseId": "greeting",
+      "source": "gg",
+      "target": "おつかれ（良い試合だった）",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["gg all"],
+      "note": "発話の意図と口調を保持する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    },
+    {
+      "termId": "d2.chat.brb",
+      "senseId": "away",
+      "source": "brb",
+      "target": "少し離席",
+      "aliases": [],
+      "direction": "en-ja",
+      "conditions": { "activity": "Any" },
+      "examples": ["brb 2 min"],
+      "note": "発話の意図と口調を保持する",
+      "provenance": { "kind": "spec-example", "reviewStatus": "pending", "reviewedAt": null }
+    }
+  ]
+}

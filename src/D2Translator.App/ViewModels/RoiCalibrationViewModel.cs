@@ -7,8 +7,10 @@ using D2Translator.App.Presentation;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Ocr;
 using D2Translator.Domain.Capture;
+using D2Translator.Domain.Chat;
 using D2Translator.Domain.Geometry;
 using D2Translator.Domain.Ocr;
+using D2Translator.TextTracking.Parsing;
 
 namespace D2Translator.App.ViewModels;
 
@@ -28,6 +30,7 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
     private readonly Dispatcher _dispatcher;
     private readonly CancellationTokenSource _cts = new();
     private readonly Lock _frameGate = new();
+    private readonly ChatLineParser _parser = new(ChatFormat.JapaneseClient);
 
     private ICaptureSource? _source;
     private Task? _previewTask;
@@ -130,15 +133,36 @@ public sealed partial class RoiCalibrationViewModel : ObservableObject, IAsyncDi
             try
             {
                 OcrObservation observation = await _ocr.RecognizeAsync(frame, _cts.Token);
-                string lines = observation.Lines.Count == 0
-                    ? "（文字を認識できませんでした）"
-                    : string.Join(Environment.NewLine, observation.Lines.Select(l => l.Text));
-                TestResultText = $"{lines}{Environment.NewLine}— {observation.Lines.Count} 行、{observation.OcrDuration.TotalMilliseconds:0} ms";
+                if (observation.Lines.Count == 0)
+                {
+                    TestResultText = "（文字を認識できませんでした）";
+                    return;
+                }
+
+                IReadOnlyList<ChatCandidate> candidates = _parser.Parse(observation.Lines, observation.RoiBounds);
+                string rows = string.Join(Environment.NewLine, observation.Lines.Select(l => l.Text));
+                string messages = candidates.Count == 0
+                    ? "（発言として解析できる行はありません）"
+                    : string.Join(Environment.NewLine, candidates.Select(Describe));
+                TestResultText =
+                    $"■ 読み取った行（{observation.Lines.Count} 行、{observation.OcrDuration.TotalMilliseconds:0} ms）{Environment.NewLine}{rows}" +
+                    $"{Environment.NewLine}{Environment.NewLine}■ 発言としての解析（入力欄は除外）{Environment.NewLine}{messages}";
             }
             catch (OperationCanceledException)
             {
             }
         }
+    }
+
+    private static string Describe(ChatCandidate candidate)
+    {
+        string who = candidate.Kind switch
+        {
+            ChatLineKind.Own => $"自分 → {candidate.ChannelLabel}",
+            ChatLineKind.Player => candidate.Speaker ?? "不明",
+            _ => "システム",
+        };
+        return $"{who}{(candidate.IsUncertain ? "（要確認）" : string.Empty)}: {candidate.Body}";
     }
 
     [RelayCommand]

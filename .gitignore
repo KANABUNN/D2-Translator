@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Evaluation images contain other players' names; keep them local
+eval-data/

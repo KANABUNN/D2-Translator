@@ -1,6 +1,12 @@
 using System.Runtime.CompilerServices;
 using D2Translator.Application.Capture;
+using D2Translator.Application.Chat;
 using D2Translator.Application.Ocr;
+using D2Translator.DictionaryContext;
+using D2Translator.TextTracking.Parsing;
+using D2Translator.TextTracking.Speakers;
+using D2Translator.TextTracking.Tracking;
+using Microsoft.Extensions.Logging.Abstractions;
 using D2Translator.Domain.Capture;
 using D2Translator.Domain.Geometry;
 using D2Translator.Domain.Ocr;
@@ -69,6 +75,18 @@ internal sealed class FakeOcr : IOcrRecognizer
             Lines = [new OcrLine($"fill {frame.Pixels.Span[0]}", frame.RoiInFrame, [])],
         });
     }
+}
+
+internal static class TestPipelines
+{
+    public static ChatFeed NewFeed() => new(
+        new ChatLineParser(ChatFormat.JapaneseClient),
+        new MessageTracker(TimeProvider.System),
+        new SpeakerRegistry(),
+        GlossaryMatcher.FromDocument(GlossaryLoader.LoadExample().Document!));
+
+    public static ReceivePipeline NewPipeline(IOcrRecognizer ocr, ChatFeed? feed = null) =>
+        new(ocr, feed ?? NewFeed(), TimeProvider.System, NullLogger<ReceivePipeline>.Instance);
 }
 
 internal static class TestProfiles

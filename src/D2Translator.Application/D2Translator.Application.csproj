@@ -10,7 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\D2Translator.DictionaryContext\D2Translator.DictionaryContext.csproj" />
     <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
+    <ProjectReference Include="..\D2Translator.TextTracking\D2Translator.TextTracking.csproj" />
   </ItemGroup>
 
   <ItemGroup>

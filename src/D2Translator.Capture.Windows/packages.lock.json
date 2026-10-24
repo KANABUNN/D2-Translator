@@ -58,12 +58,27 @@
       "d2translator.application": {
         "type": "Project",
         "dependencies": {
+          "D2Translator.DictionaryContext": "[0.1.0, )",
           "D2Translator.Domain": "[0.1.0, )",
+          "D2Translator.TextTracking": "[0.1.0, )",
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, )"
+        }
+      },
+      "d2translator.dictionarycontext": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Domain": "[0.1.0, )",
+          "D2Translator.TextTracking": "[0.1.0, )"
         }
       },
       "d2translator.domain": {
         "type": "Project"
+      },
+      "d2translator.texttracking": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Domain": "[0.1.0, )"
+        }
       },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "CentralTransitive",
