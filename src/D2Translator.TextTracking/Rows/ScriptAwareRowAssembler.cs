@@ -74,7 +74,9 @@ public static class ScriptAwareRowAssembler
             bool[] inSpan = new bool[words.Count];
             for (int i = 0; i < words.Count; i++)
             {
-                inSpan[i] = words[i].Text.Any(TextUtil.IsCjkLetter);
+                // 英字が多い語（例: I'll を誤読した ドll）は英字の誤読とみなす
+                string text = words[i].Text;
+                inSpan[i] = TextUtil.CountCjkLetters(text) > text.Count(char.IsAsciiLetter);
             }
 
             // 日本語の文字に隣接する記号を範囲へ含める（前後に広げる）
@@ -103,8 +105,9 @@ public static class ScriptAwareRowAssembler
             int start = -1;
             for (int i = 0; i <= words.Count; i++)
             {
+                // 行頭の表示は : で終わる。その後ろの本文の誤読（例: I' → ド）を行頭の範囲につなげない
                 bool continues = i < words.Count && inSpan[i] &&
-                    (start < 0 || Gap(words[i - 1].Bounds, words[i].Bounds) <= lineHeight);
+                    (start < 0 || (Gap(words[i - 1].Bounds, words[i].Bounds) <= lineHeight && !EndsWithColon(words[i - 1].Text)));
                 if (continues && start < 0)
                 {
                     start = i;
@@ -263,6 +266,8 @@ public static class ScriptAwareRowAssembler
 
         return new string(chars);
     }
+
+    private static bool EndsWithColon(string text) => text.Length > 0 && text[^1] is ':' or '：';
 
     private static bool IsAttachable(string text) =>
         text.Length > 0 && text.All(c => AttachablePunctuation.Contains(c) || TextUtil.IsCjk(c) || char.IsPunctuation(c));

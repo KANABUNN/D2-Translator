@@ -93,7 +93,7 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | Phase 1 キャプチャ、ROI、独立表示 | 実装済み。D2 実機で取得を確認。日本語クライアントの行頭表示は Phase 2 で対応（[記録](docs/phase1/verification.md)） |
 | Phase 2 OCR、行追跡、辞書注釈 | 実装済み。受入評価用の画像の収集と、実機での追跡確認が残る（[記録](docs/phase2/report.md)） |
 | Phase 3 辞書、文脈、GPT-6 Luna 接続 | 実装済み。実 API での接続確認と翻訳品質の評価が残る（[記録](docs/phase3/report.md)） |
-| Phase 4 C方式、返信入力、コピー、設定の統合 | 実装済み。ゲーム上でのオーバーレイと返信の確認が残る（[記録](docs/phase4/report.md)） |
+| Phase 4 C方式、返信入力、コピー、設定の統合 | 実装済み。ゲーム上でオーバーレイ、返信、コピー、ホットキーを確認（[記録](docs/phase4/report.md)） |
 | Phase 5〜6 | 未着手 |
 
 ## 操作

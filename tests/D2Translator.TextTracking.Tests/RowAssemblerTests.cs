@@ -87,6 +87,36 @@ public class RowAssemblerTests
     }
 
     [Fact]
+    public void Body_misread_as_katakana_right_after_the_prefix_is_not_joined_to_it()
+    {
+        // 日本語 OCR が I'll の I' を「ド」と読み、行頭の : の直後につながった場合（Phase 4 の実機確認）
+        OcrWord[] prefix = Chars("[ファイアチーム]宛て:", 10);
+        OcrLine cjk = Line([.. prefix, Word("ド", 256, 18), Word("ll", 274, 10), Word("do", 294, 24), Word("DPS.", 324, 48)]);
+        OcrLine latin = Line(Word("{7c", 12, 100), Word("I'll", 256, 28), Word("do", 294, 24), Word("DPS.", 324, 48));
+
+        OcrLine row = Assert.Single(ScriptAwareRowAssembler.Assemble([latin], [cjk]));
+
+        Assert.Equal("[ファイアチーム]宛て: I'll do DPS.", row.Text);
+    }
+
+    [Fact]
+    public void Mixed_word_with_more_latin_letters_is_treated_as_latin()
+    {
+        OcrLine cjk = Line(Word("ドll", 10, 30), Word("go", 50, 20));
+        OcrLine latin = Line(Word("I'll", 10, 30), Word("go", 50, 20));
+
+        Assert.Equal("I'll go", Assert.Single(ScriptAwareRowAssembler.Assemble([latin], [cjk])).Text);
+    }
+
+    [Fact]
+    public void Japanese_body_after_the_prefix_is_kept()
+    {
+        OcrLine cjk = Line([.. Chars("[クラン]宛て:", 10), .. Chars("よろしく", 172)]);
+
+        Assert.Equal("[クラン]宛て:よろしく", Assert.Single(ScriptAwareRowAssembler.Assemble([], [cjk])).Text);
+    }
+
+    [Fact]
     public void Single_japanese_symbol_misread_from_latin_does_not_cut_words()
     {
         // 日本語 OCR が英単語 for の r を「と読んだ場合
