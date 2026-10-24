@@ -121,6 +121,12 @@ public sealed partial class MainViewModel : ObservableObject
         feed.Updated += (_, update) => _dispatcher.InvokeAsync(() => ApplyUpdate(update));
         translator.Updated += (_, view) => _dispatcher.InvokeAsync(() => ApplyTranslation(view));
         translator.StateChanged += (_, _) => _dispatcher.InvokeAsync(UpdateTranslationStatus);
+
+        OverlayBackground = System.Windows.Media.Brushes.Transparent;
+        OverlayStatusText = string.Empty;
+        HotkeyStatusText = string.Empty;
+        CaptureExclusionText = "未確認";
+        InitializeDisplay();
     }
 
     [ObservableProperty]
@@ -207,6 +213,7 @@ public sealed partial class MainViewModel : ObservableObject
             }
 
             _controller.SetTarget(target);
+            _overlayPolicy.SetTarget(target.DisplayName);
             TargetName = target.DisplayName;
             Lines.Clear();
 
@@ -290,13 +297,6 @@ public sealed partial class MainViewModel : ObservableObject
         _controller.Start(_settings.Current.Capture.OcrRate);
     }
 
-    [RelayCommand]
-    private void OpenTranslationSettings()
-    {
-        _dialogs.ShowTranslationSettings();
-        UpdateTranslationStatus();
-    }
-
     /// <summary>利用者の明示操作による翻訳（開始前から表示、要確認、失敗、期限切れ、訂正後）。</summary>
     [RelayCommand]
     private void TranslateMessage(Guid messageId) => _translator.RequestManual(messageId);
@@ -316,6 +316,7 @@ public sealed partial class MainViewModel : ObservableObject
     private void OnStateChanged(CaptureStateChangedEventArgs e)
     {
         CaptureStateText = StatusLabels.Of(e.Current);
+        UpdateOverlayStatus();
         if (e.Reason is ErrorCode reason)
         {
             Notice = StatusLabels.Of(reason);
@@ -343,6 +344,8 @@ public sealed partial class MainViewModel : ObservableObject
         {
             Lines.Add(new OcrLineItem(line.Text, line.Bounds.ToString()));
         }
+
+        CheckSelfCapture(observation.Lines.Select(l => l.Text));
 
         LastObservationText = $"観測 {observation.CapturedAt.ToLocalTime():HH:mm:ss.fff}（取得時刻） " +
             $"{observation.Lines.Count} 行、OCR {observation.OcrDuration.TotalMilliseconds:0} ms";
@@ -380,6 +383,7 @@ public sealed partial class MainViewModel : ObservableObject
             if (_messageIndex.Remove(id, out MessageItem? removed))
             {
                 Messages.Remove(removed);
+                UpdateRecent();
             }
 
             return;
@@ -392,6 +396,11 @@ public sealed partial class MainViewModel : ObservableObject
     private void ApplyTranslation(TranslationView view)
     {
         _translations[view.MessageId] = view;
+        if (view.Text is { } shown && view.Status is TranslationStatus.Translated or TranslationStatus.NeedsReview)
+        {
+            _selfCapture.Shown(shown);
+        }
+
         if (_messages.ContainsKey(view.MessageId))
         {
             Render(view.MessageId);
@@ -426,6 +435,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         _messageIndex[id] = item;
+        UpdateRecent();
     }
 
     private void UpdateTranslationStatus()

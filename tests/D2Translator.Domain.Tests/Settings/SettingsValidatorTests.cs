@@ -53,6 +53,20 @@ public class SettingsValidatorTests
     }
 
     [Fact]
+    public void Overlay_width_and_hotkeys_are_validated()
+    {
+        var settings = new AppSettings
+        {
+            Display = new DisplaySettings { OverlayWidthDip = 200 },
+            Hotkeys = new HotkeySettings { TogglePause = "T", OpenReply = null },
+        };
+
+        string[] paths = [.. SettingsValidator.Validate(settings).Select(i => i.Path)];
+
+        Assert.Equal(["display.overlayWidthDip", "hotkeys.togglePause"], paths);
+    }
+
+    [Fact]
     public void Out_of_range_values_are_reported_by_key()
     {
         var settings = new AppSettings

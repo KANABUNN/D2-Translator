@@ -1,0 +1,76 @@
+<Window x:Class="D2Translator.App.Views.OverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="D2 Chat Translator オーバーレイ"
+        SizeToContent="Height" MaxHeight="900"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" Topmost="True" ShowInTaskbar="False" ShowActivated="False"
+        Focusable="False">
+  <!-- 背景だけを半透明にし、文字は不透明のまま読みやすくする（仕様書 11.3） -->
+  <Border x:Name="Frame" Background="{Binding OverlayBackground}" CornerRadius="6" Padding="12,8" BorderThickness="2">
+    <Border.Style>
+      <Style TargetType="Border">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Style.Triggers>
+          <DataTrigger Binding="{Binding IsPlacementEditing}" Value="True">
+            <Setter Property="BorderBrush" Value="#FF3FA9F5" />
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+    </Border.Style>
+    <StackPanel TextElement.Foreground="White" TextElement.FontSize="{Binding OverlayFontSize}">
+      <TextBlock Text="配置編集中: ドラッグで移動、Esc で終了" FontSize="12" Foreground="#FF9AD4FF" Margin="0,0,0,4">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsPlacementEditing}" Value="True">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+      <TextBlock Text="{Binding OverlayStatusText}" FontSize="12" Foreground="#FFFFC66D" Margin="0,0,0,4">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding OverlayStatusText}" Value="">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+      <ItemsControl ItemsSource="{Binding RecentMessages}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Margin="0,3">
+              <TextBlock TextWrapping="Wrap" MaxHeight="200" TextTrimming="CharacterEllipsis">
+                <Run Text="{Binding Header, Mode=OneWay}" FontSize="12" Foreground="#FFB8C4D0" />
+                <Run Text=" " />
+                <Run Text="{Binding Primary, Mode=OneWay}" FontWeight="SemiBold" />
+              </TextBlock>
+              <TextBlock Text="{Binding Secondary}" FontSize="12" Foreground="#FFB0B0B0" TextTrimming="CharacterEllipsis">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding HasSecondary}" Value="False">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Border>
+</Window>

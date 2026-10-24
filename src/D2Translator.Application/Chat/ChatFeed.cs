@@ -68,6 +68,9 @@ public sealed class ChatFeed(ChatLineParser parser, MessageTracker tracker, Spea
         });
     }
 
+    /// <summary>返信の下書き等、画面外の文に含まれる既知の話者名を探す（決定 D14）。</summary>
+    public IReadOnlyList<TextAnnotation> FindMentions(string text) => speakers.FindMentions(text);
+
     public void OnUnchanged(long timestamp) => Publish(() => tracker.ApplyUnchanged(timestamp));
 
     public void Tick(long timestamp) => Publish(() => tracker.Tick(timestamp));

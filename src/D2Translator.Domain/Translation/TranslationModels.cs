@@ -40,6 +40,9 @@ public sealed record TranslationRequest
 
     public string Activity { get; init; } = "Unknown";
 
+    /// <summary>日英の返信の文体（仕様書 10.1）。受信の英日では使わない。</summary>
+    public Settings.SendStyle Style { get; init; } = Settings.SendStyle.Neutral;
+
     public required string GlossaryVersion { get; init; }
 
     /// <summary>要求発行からの全試行の合計期限。</summary>

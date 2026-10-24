@@ -5,6 +5,7 @@ using D2Translator.App.Views;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Chat;
 using D2Translator.Application.Ocr;
+using D2Translator.Application.Reply;
 using D2Translator.Application.Translation;
 using D2Translator.Translation.OpenAI;
 using D2Translator.Infrastructure.Storage;
@@ -40,7 +41,10 @@ public partial class App : System.Windows.Application
         }
 
         _services = ConfigureServices();
-        var window = new MainWindow(_services.GetRequiredService<MainViewModel>());
+        var window = new MainWindow(
+            _services.GetRequiredService<MainViewModel>(),
+            _services.GetRequiredService<AppSettingsService>(),
+            _services.GetRequiredService<HotkeyStatusStore>());
         MainWindow = window;
         window.Show();
     }
@@ -94,6 +98,8 @@ public partial class App : System.Windows.Application
             sp.GetRequiredService<ILogger<TranslationCoordinator>>()));
         services.AddSingleton<ReceivePipeline>();
         services.AddSingleton<CaptureController>();
+        services.AddSingleton<HotkeyStatusStore>();
+        services.AddSingleton<IClipboardService, WpfClipboardService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<MainViewModel>();
         return services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });

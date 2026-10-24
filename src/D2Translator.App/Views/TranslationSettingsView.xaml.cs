@@ -1,17 +1,14 @@
 using System.Windows;
+using System.Windows.Controls;
 using D2Translator.App.ViewModels;
 
 namespace D2Translator.App.Views;
 
-public partial class TranslationSettingsWindow : Window
+public partial class TranslationSettingsView : UserControl
 {
-    private readonly TranslationSettingsViewModel _viewModel;
-
-    public TranslationSettingsWindow(TranslationSettingsViewModel viewModel)
+    public TranslationSettingsView()
     {
         InitializeComponent();
-        _viewModel = viewModel;
-        DataContext = viewModel;
     }
 
     // PasswordBox は値をバインドできないため、ここで受け取ってすぐ消す
@@ -19,6 +16,9 @@ public partial class TranslationSettingsWindow : Window
     {
         string key = KeyBox.Password;
         KeyBox.Clear();
-        await _viewModel.SaveKeyAsync(key);
+        if (DataContext is TranslationSettingsViewModel viewModel)
+        {
+            await viewModel.SaveKeyAsync(key);
+        }
     }
 }

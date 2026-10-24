@@ -148,7 +148,8 @@ public sealed class SpeakerRegistry
             }
         }
 
-        string pattern = $@"(?<![\p{{L}}\p{{N}}])(?:{string.Join('|', alternatives.OrderByDescending(a => a.Length))})(?![\p{{L}}\p{{N}}])";
+        // 境界は英数字だけで判定する。日本語の文中の名前（例: Kestrelさん）も見つけるため
+        string pattern = $@"(?<![A-Za-z0-9])(?:{string.Join('|', alternatives.OrderByDescending(a => a.Length))})(?![A-Za-z0-9])";
         return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50));
     }
 

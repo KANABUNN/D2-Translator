@@ -86,6 +86,7 @@ public sealed record TranslationOptions(
 public sealed class TranslationCoordinator : IAsyncDisposable
 {
     public const int IncomingQueueCapacity = 20;
+    public const int ReplyQueueCapacity = 2;
     public const int MaxConcurrentRequests = 2;
     public const int MaxAutoRetranslations = 1;
     public static readonly TimeSpan QueueExpiry = TimeSpan.FromSeconds(5);
@@ -107,8 +108,10 @@ public sealed class TranslationCoordinator : IAsyncDisposable
     private readonly CircuitBreaker _breaker;
     private readonly RequestRateLimiter _rate;
     private readonly UsageMeter _usage = new();
+    private readonly PriorityGate _requestGate = new(MaxConcurrentRequests);
 
     private TranslationOptions _options;
+    private int _pendingReplies;
     private Guid _sessionId;
     private (TranslationServiceState State, string Detail)? _stopped;
     private int _sessionRequests;
@@ -214,6 +217,180 @@ public sealed class TranslationCoordinator : IAsyncDisposable
 
         Publish(view);
         return view?.Status == TranslationStatus.Queued;
+    }
+
+    /// <summary>
+    /// 日本語の返信を英訳する（仕様書 10.1、15.2）。受信より優先するが、同時実行数、回数上限、遮断は共有する。
+    /// 下書きに書いた既知の名前は記号にして送り、英訳で元へ戻す。
+    /// </summary>
+    /// <param name="useContext">利用者が直近の会話を参考にすることを選んだ。文脈の送信が有効な時だけ使う。</param>
+    public Task<ReplyTranslation> TranslateReplyAsync(string japanese, SendStyle style, bool useContext, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(japanese);
+        var mentions = _feed.FindMentions(japanese);
+        AnonymizedText anonymized = Anonymizer.Anonymize(new ChatMessage
+        {
+            MessageId = Guid.NewGuid(),
+            SessionId = Guid.Empty,
+            Sequence = 0,
+            Kind = ChatLineKind.Own,
+            RawText = japanese,
+            ObservedAt = _time.GetUtcNow(),
+            Status = MessageStatus.GlossaryOnly,
+            Annotations = mentions,
+        });
+
+        TranslationOptions options = Options;
+        IReadOnlyList<ContextLine> context = [];
+        if (useContext && options.ContextEnabled)
+        {
+            lock (_gate)
+            {
+                context = ContextBuilder.BuildRecent([.. _order.Select(id => _records[id].Message)], _sessionId, _time.GetUtcNow());
+            }
+        }
+
+        var request = new TranslationRequest
+        {
+            RequestId = Guid.NewGuid(),
+            MessageId = Guid.NewGuid(),
+            Revision = 1,
+            Direction = TranslationDirection.JaEn,
+            SourceText = anonymized.Text,
+            Style = style,
+            Context = context,
+            GlossaryVersion = _feed.DictionaryVersion,
+            Deadline = options.Deadline,
+            MaxOutputTokens = options.MaxOutputTokens,
+        };
+
+        return SendPriorityAsync(request, anonymized, TranslationChecks.JaEn, ct);
+    }
+
+    /// <summary>英訳候補を日本語へ戻して意味を確かめる（逆翻訳、仕様書 10.1）。追加の API 利用になる。</summary>
+    public Task<ReplyTranslation> ReverseTranslateAsync(string english, CancellationToken ct)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(english);
+        TranslationOptions options = Options;
+        var request = new TranslationRequest
+        {
+            RequestId = Guid.NewGuid(),
+            MessageId = Guid.NewGuid(),
+            Revision = 1,
+            Direction = TranslationDirection.EnJa,
+            SourceText = english,
+            GlossaryVersion = _feed.DictionaryVersion,
+            Deadline = options.Deadline,
+            MaxOutputTokens = options.MaxOutputTokens,
+        };
+
+        return SendPriorityAsync(request, new AnonymizedText(english, new Dictionary<string, string>()), TranslationChecks.EnJa, ct);
+    }
+
+    private async Task<ReplyTranslation> SendPriorityAsync(TranslationRequest request, AnonymizedText anonymized,
+        Func<string, string, IReadOnlyList<string>> check, CancellationToken ct)
+    {
+        string cacheKey = TranslationCache.KeyOf(request);
+        bool limitReached;
+        lock (_gate)
+        {
+            (TranslationServiceState state, string detail) = ComputeState();
+            if (state is not (TranslationServiceState.Ready or TranslationServiceState.CircuitOpen))
+            {
+                return ReplyTranslation.Failure(detail, ErrorFor(state));
+            }
+
+            if (!_breaker.TryEnter(out TimeSpan reopenIn))
+            {
+                return ReplyTranslation.Failure($"TR03 通信障害が続いたため外部送信を一時停止しています（あと {Math.Ceiling(reopenIn.TotalSeconds):0} 秒）。", ErrorCode.TR03);
+            }
+
+            if (_cache.TryGet(cacheKey, out TranslationResult cached))
+            {
+                _breaker.Release();
+                _usage.RecordCacheHit();
+                return ReplyTranslation.From(cached, anonymized, check);
+            }
+
+            if (_pendingReplies >= ReplyQueueCapacity)
+            {
+                _breaker.Release();
+                return ReplyTranslation.Failure("返信の翻訳待ちが上限（2 件）に達しています。しばらく待ってから試してください。", ErrorCode.TR02);
+            }
+
+            limitReached = _sessionRequests >= _options.SessionRequestCap;
+            if (limitReached)
+            {
+                _breaker.Release();
+                _stopped = (TranslationServiceState.LimitReached, $"TR02 このセッションの要求上限 {_options.SessionRequestCap} 回に達しました。");
+            }
+            else if (!_rate.TryAcquire(_options.RequestsPerMinute, 1, out TimeSpan rateRetry))
+            {
+                _breaker.Release();
+                return ReplyTranslation.Failure(
+                    $"TR02 1 分あたりの上限 {_options.RequestsPerMinute} 回に達しました（あと {Math.Ceiling(rateRetry.TotalSeconds):0} 秒）。", ErrorCode.TR02);
+            }
+            else
+            {
+                _sessionRequests++;
+                _pendingReplies++;
+            }
+        }
+
+        if (limitReached)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+            return ReplyTranslation.Failure(Status.Detail, ErrorCode.TR02);
+        }
+
+        TranslationResult result;
+        bool issued = false;
+        try
+        {
+            using (await _requestGate.EnterAsync(priority: true, ct).ConfigureAwait(false))
+            {
+                lock (_gate)
+                {
+                    _pendingReplies--;
+                    issued = true;
+                }
+
+                result = await _provider.TranslateAsync(request, ct).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            lock (_gate)
+            {
+                if (!issued)
+                {
+                    _pendingReplies--;
+                }
+
+                _breaker.Release();
+            }
+
+            throw;
+        }
+
+        _usage.Record(result);
+        bool stateChanged;
+        lock (_gate)
+        {
+            _breaker.Record(result.Outcome);
+            stateChanged = ApplyServiceOutcome(result);
+            if (result.IsSuccess)
+            {
+                _cache.Set(cacheKey, result);
+            }
+        }
+
+        if (stateChanged || _breaker.IsOpen)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        return ReplyTranslation.From(result, anonymized, check);
     }
 
     /// <summary>
@@ -433,7 +610,11 @@ public sealed class TranslationCoordinator : IAsyncDisposable
         }
 
         (TranslationRequest request, AnonymizedText anonymized, string cacheKey, Guid sessionId) = prepared;
-        TranslationResult result = await _provider.TranslateAsync(request, _shutdown.Token).ConfigureAwait(false);
+        TranslationResult result;
+        using (await _requestGate.EnterAsync(priority: false, _shutdown.Token).ConfigureAwait(false))
+        {
+            result = await _provider.TranslateAsync(request, _shutdown.Token).ConfigureAwait(false);
+        }
         _usage.Record(result);
 
         TranslationView? view;

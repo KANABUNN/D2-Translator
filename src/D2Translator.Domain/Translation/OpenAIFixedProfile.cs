@@ -34,8 +34,8 @@ public static class OpenAIFixedProfile
     /// <summary>API キーの保存名。設定ファイルにはキーの値でなくこの名前だけを持つ。</summary>
     public const string SecretRef = "openai-api-key";
 
-    /// <summary>受信の英日翻訳の指示文の版。変更したら品質と遅延を再評価する。</summary>
-    public const string PromptVersion = "en-ja/2026-10-24.1";
+    /// <summary>指示文の版（受信の英日と返信の日英）。変更したら品質と遅延を再評価する。</summary>
+    public const string PromptVersion = "en-ja/2026-10-24.1+ja-en/2026-10-24.1";
 
     public const string SchemaVersion = "translation-result/1";
 

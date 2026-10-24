@@ -262,6 +262,35 @@ public sealed class TranslationCoordinatorTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Reply_masks_names_in_japanese_text_and_restores_them()
+    {
+        _translator.Respond = r => FakeTranslator.Success(r, "Thanks ⟦P1⟧, let's go with 2 more");
+        TranslationCoordinator coordinator = Start();
+        _feed.OnObservation(Observation(Baseline), Ms(0));
+
+        ReplyTranslation reply = await coordinator.TranslateReplyAsync("Kestrelさん、ありがとう。あと2人で行こう",
+            Domain.Settings.SendStyle.Short, useContext: false, TestContext.Current.CancellationToken);
+
+        TranslationRequest sent = Assert.Single(_translator.Requests);
+        Assert.Equal((TranslationDirection.JaEn, Domain.Settings.SendStyle.Short), (sent.Direction, sent.Style));
+        Assert.Equal("⟦P1⟧さん、ありがとう。あと2人で行こう", sent.SourceText);
+        Assert.True(reply.IsSuccess);
+        Assert.Equal("Thanks Kestrel, let's go with 2 more", reply.Text);
+        Assert.Empty(reply.Problems);
+    }
+
+    [Fact]
+    public async Task Reply_is_not_sent_when_cloud_translation_is_disabled()
+    {
+        TranslationCoordinator coordinator = Start(Options(cloud: false));
+
+        ReplyTranslation reply = await coordinator.TranslateReplyAsync("ありがとう", Domain.Settings.SendStyle.Neutral, false, TestContext.Current.CancellationToken);
+
+        Assert.False(reply.IsSuccess);
+        Assert.Empty(_translator.Requests);
+    }
+
+    [Fact]
     public async Task Translation_that_drops_a_name_token_needs_review()
     {
         _translator.Respond = r => FakeTranslator.Success(r, "雑魚を片付けて");

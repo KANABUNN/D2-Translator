@@ -22,7 +22,26 @@ public static class SettingsValidator
         Range(issues, "display.opacity", display.Opacity, 0.20, 0.95);
         Range(issues, "display.fontSizeDip", display.FontSizeDip, 14, 32);
         Range(issues, "display.maxMessages", display.MaxMessages, 1, 10);
+        Range(issues, "display.overlayWidthDip", display.OverlayWidthDip, 280, 1200);
         Defined(issues, "display.mode", display.Mode);
+        if (display.OverlayLeft is double left && !double.IsFinite(left) || display.OverlayTop is double top && !double.IsFinite(top))
+        {
+            issues.Add(new("display.overlayLeft", "オーバーレイの位置が数値ではありません。"));
+        }
+
+        foreach ((string path, string? gesture) in new[]
+        {
+            ("hotkeys.togglePause", settings.Hotkeys.TogglePause),
+            ("hotkeys.toggleDisplayMode", settings.Hotkeys.ToggleDisplayMode),
+            ("hotkeys.toggleOverlayVisibility", settings.Hotkeys.ToggleOverlayVisibility),
+            ("hotkeys.openReply", settings.Hotkeys.OpenReply),
+        })
+        {
+            if (gesture is not null && !HotkeyGesture.TryParse(gesture, out _))
+            {
+                issues.Add(new(path, $"キーの組合せを解釈できません: {gesture}"));
+            }
+        }
 
         CaptureSettings capture = settings.Capture;
         Range(issues, "capture.ocrRate", capture.OcrRate, 2, 10);

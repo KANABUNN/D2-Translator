@@ -1,0 +1,91 @@
+<Window x:Class="D2Translator.App.Views.ReplyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:ReplyViewModel}"
+        Title="返信"
+        Width="640" Height="600" MinWidth="480" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+  <Window.Resources>
+    <vm:SendStyleLabelConverter x:Key="StyleLabel" />
+  </Window.Resources>
+  <!-- 日本語入力、英語候補、操作と注意表示の順に並べる（仕様書 11.4） -->
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <DockPanel Grid.Row="0" Margin="0,0,0,4">
+      <TextBlock DockPanel.Dock="Right" Text="{Binding DraftCount}" Style="{StaticResource StatusLabel}" />
+      <TextBlock Style="{StaticResource SectionHeader}" Text="日本語（Ctrl+Enter で英訳、Shift+Enter で改行）" />
+    </DockPanel>
+    <TextBox x:Name="DraftBox" Grid.Row="1" Text="{Binding Draft, UpdateSourceTrigger=PropertyChanged}"
+             AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontSize="15"
+             InputMethod.IsInputMethodEnabled="True" AutomationProperties.Name="日本語の下書き"
+             PreviewKeyDown="DraftBox_PreviewKeyDown" />
+
+    <WrapPanel Grid.Row="2" Margin="0,8,0,8">
+      <TextBlock Text="文体:" VerticalAlignment="Center" Style="{StaticResource StatusLabel}" />
+      <ComboBox ItemsSource="{Binding Styles}" SelectedItem="{Binding Style}" MinWidth="200" Margin="0,0,12,0"
+                AutomationProperties.Name="文体">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Converter={StaticResource StyleLabel}}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <CheckBox Content="直近の会話を参考にする" IsChecked="{Binding UseContext}" IsEnabled="{Binding ContextAvailable}"
+                VerticalAlignment="Center" Margin="0,0,12,0"
+                ToolTip="翻訳設定で文脈の送信を有効にしている時だけ使えます" />
+      <Button Content="英訳" Command="{Binding TranslateCommand}" />
+    </WrapPanel>
+
+    <DockPanel Grid.Row="3" Margin="0,0,0,4">
+      <TextBlock DockPanel.Dock="Right" Text="{Binding CandidateCount}" Style="{StaticResource StatusLabel}" />
+      <TextBlock Style="{StaticResource SectionHeader}" Text="英訳（直してからコピーできます）" />
+    </DockPanel>
+    <TextBox Grid.Row="4" Text="{Binding Candidate, UpdateSourceTrigger=PropertyChanged}"
+             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontSize="15" AutomationProperties.Name="英訳の候補" />
+
+    <StackPanel Grid.Row="5" Margin="0,8,0,0">
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+        <Button Content="コピー" Command="{Binding CopyCommand}" />
+        <Button Content="逆翻訳で確認" Command="{Binding ReverseTranslateCommand}" ToolTip="英訳を日本語に戻して意味を確かめます（API 利用料が生じ得ます）" />
+        <Button Content="消去" Command="{Binding ClearCommand}" />
+      </StackPanel>
+      <Border BorderThickness="1" Padding="8" Margin="0,0,0,8"
+              BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+        <Border.Style>
+          <Style TargetType="Border">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding HasLateCandidate}" Value="False">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Content="こちらを使う" Command="{Binding UseLateCandidateCommand}" Margin="8,0,0,0" />
+          <TextBlock TextWrapping="Wrap">
+            <Run Text="変更前の入力に対する英訳: " />
+            <Run Text="{Binding LateCandidateText, Mode=OneWay}" />
+          </TextBlock>
+        </DockPanel>
+      </Border>
+      <TextBlock Text="{Binding ReverseText}" TextWrapping="Wrap" Margin="0,0,0,4" Style="{StaticResource StatusLabel}" />
+      <TextBlock Text="{Binding Notes}" TextWrapping="Wrap" Margin="0,0,0,4" />
+    </StackPanel>
+
+    <TextBlock Grid.Row="6" Text="{Binding Status}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,4,0,0" />
+  </Grid>
+</Window>

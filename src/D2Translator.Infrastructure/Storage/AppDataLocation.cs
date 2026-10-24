@@ -26,8 +26,16 @@ public sealed class AppDataLocation
 
     public string SecretsPath => Path.Combine(RootDirectory, "secrets.dpapi");
 
+    /// <summary>開発時の確認で、利用者の実際の設定を書き換えないための保存先の上書き。</summary>
+    public const string OverrideVariable = "D2CT_DATA_DIR";
+
     public static AppDataLocation Resolve()
     {
+        if (Environment.GetEnvironmentVariable(OverrideVariable) is { Length: > 0 } overridden)
+        {
+            return new AppDataLocation(Path.GetFullPath(overridden), isPackaged: false);
+        }
+
         if (TryGetPackagedLocalFolder() is string packaged)
         {
             return new AppDataLocation(packaged, isPackaged: true);

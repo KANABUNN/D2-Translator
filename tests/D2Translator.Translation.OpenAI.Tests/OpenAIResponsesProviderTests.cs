@@ -248,9 +248,24 @@ public class OpenAIResponsesProviderTests
     }
 
     [Fact]
-    public void Reply_direction_is_not_implemented_yet()
+    public void Reply_request_uses_reply_instructions_and_style()
     {
-        Assert.Throws<NotSupportedException>(() => OpenAIRequestBuilder.Build(Api.Request() with { Direction = TranslationDirection.JaEn }));
+        TranslationRequest request = Api.Request() with
+        {
+            Direction = TranslationDirection.JaEn,
+            SourceText = "あと2人で行こう",
+            Style = D2Translator.Domain.Settings.SendStyle.Short,
+            Glossary = [],
+            Context = [],
+        };
+
+        JsonNode json = JsonNode.Parse(OpenAIRequestBuilder.Build(request))!;
+        JsonNode input = JsonNode.Parse((string)json["input"]!)!;
+
+        Assert.Equal(OpenAIPrompt.ReplyInstructions, (string?)json["instructions"]);
+        Assert.Equal(("ja-en", "short", "あと2人で行こう"), ((string?)input["direction"], (string?)input["style"], (string?)input["text"]));
+        Assert.Equal(("gpt-6-luna", "none"), ((string?)json["model"], (string?)json["reasoning"]!["effort"]));
+        Assert.Contains("single line", OpenAIPrompt.ReplyInstructions, StringComparison.Ordinal);
     }
 
     [Fact]

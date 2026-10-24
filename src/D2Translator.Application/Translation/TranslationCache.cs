@@ -31,6 +31,7 @@ public sealed class TranslationCache(TimeProvider time, int capacity = 500, Time
         var builder = new StringBuilder();
         Append(builder, Text.TextNormalization.ForCache(request.SourceText));
         Append(builder, request.Direction.ToString());
+        Append(builder, request.Direction == TranslationDirection.JaEn ? request.Style.ToString() : string.Empty);
         Append(builder, request.GlossaryVersion);
         foreach (GlossaryHint hint in request.Glossary.OrderBy(h => h.TermId, StringComparer.Ordinal))
         {

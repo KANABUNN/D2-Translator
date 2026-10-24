@@ -15,6 +15,7 @@ public sealed partial class TranslationSettingsViewModel : ObservableObject
     private readonly AppSettingsService _settings;
     private readonly TranslationCoordinator _translator;
     private readonly ISecretStore _secrets;
+    private readonly bool _initializing;
 
     public TranslationSettingsViewModel(AppSettingsService settings, TranslationCoordinator translator, ISecretStore secrets)
     {
@@ -22,9 +23,12 @@ public sealed partial class TranslationSettingsViewModel : ObservableObject
         _translator = translator;
         _secrets = secrets;
 
+        // 画面を開いただけで設定を変えない。初期値の反映中は変更の処理（無効化や保存）を行わない
+        _initializing = true;
+        ConsentGiven = settings.Current.Translation.CloudEnabled;
         CloudEnabled = settings.Current.Translation.CloudEnabled;
-        ConsentGiven = CloudEnabled;
         ContextEnabled = settings.Current.Context.Enabled;
+        _initializing = false;
         TestResult = string.Empty;
         KeyStatus = string.Empty;
         Message = settings.HasFixedValueViolation
@@ -82,6 +86,11 @@ public sealed partial class TranslationSettingsViewModel : ObservableObject
 
     partial void OnCloudEnabledChanged(bool value)
     {
+        if (_initializing)
+        {
+            return;
+        }
+
         if (value && (!ConsentGiven || _settings.HasFixedValueViolation))
         {
             // 送信内容と送信先の確認なしに有効にしない（仕様書 2.3、12）
@@ -97,13 +106,19 @@ public sealed partial class TranslationSettingsViewModel : ObservableObject
 
     partial void OnConsentGivenChanged(bool value)
     {
-        if (!value && CloudEnabled)
+        if (!_initializing && !value && CloudEnabled)
         {
             CloudEnabled = false;
         }
     }
 
-    partial void OnContextEnabledChanged(bool value) => Apply();
+    partial void OnContextEnabledChanged(bool value)
+    {
+        if (!_initializing)
+        {
+            Apply();
+        }
+    }
 
     /// <summary>PasswordBox から受け取ったキーを DPAPI で保存する。値は保持しない。</summary>
     public async Task SaveKeyAsync(string key)

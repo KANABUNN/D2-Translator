@@ -42,6 +42,37 @@ public static partial class TranslationChecks
         return problems;
     }
 
+    /// <summary>返信の日英翻訳の検査。記号と数字の保持、英語になっていること、1 行であること。</summary>
+    public static IReadOnlyList<string> JaEn(string anonymizedSource, string translated)
+    {
+        var problems = new List<string>();
+        IReadOnlyList<string> missing = Anonymizer.MissingTokens(anonymizedSource, translated);
+        if (missing.Count > 0)
+        {
+            problems.Add($"名前などを置き換えた記号が英訳から欠けています（{string.Join("、", missing)}）。");
+        }
+
+        string source = anonymizedSource.Normalize(System.Text.NormalizationForm.FormKC);
+        string[] lostNumbers = [.. Digits().Matches(source).Select(m => m.Value).Distinct()
+            .Where(n => !translated.Contains(n, StringComparison.Ordinal) && !IsInsidePlaceholder(source, n))];
+        if (lostNumbers.Length > 0)
+        {
+            problems.Add($"数字が英訳にありません（{string.Join("、", lostNumbers)}）。");
+        }
+
+        if (Japanese().IsMatch(translated))
+        {
+            problems.Add("英訳に日本語が残っています。");
+        }
+
+        if (translated.Contains('\n') || translated.Contains('\r'))
+        {
+            problems.Add("英訳に改行があります。ゲームでは改行を送れないため、コピー時に空白へ置き換えます。");
+        }
+
+        return problems;
+    }
+
     // ⟦P12⟧ の数字は記号の一部なので数字の保持の検査から外す
     private static bool IsInsidePlaceholder(string source, string number) =>
         !Digits().Matches(Regex.Replace(source, @"⟦[A-Z]+\d+⟧", string.Empty)).Any(m => m.Value == number);

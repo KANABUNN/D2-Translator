@@ -33,17 +33,19 @@
       <TextBlock Style="{StaticResource StatusValue}" Text="{Binding DisplayModeText}" />
     </WrapPanel>
 
-    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-      <Button Content="対象を選択…" Command="{Binding SelectTargetCommand}" />
-      <Button Content="ROI 調整…" Command="{Binding CalibrateCommand}" />
-      <Button Content="開始" Command="{Binding StartCommand}" />
-      <Button Content="停止" Command="{Binding StopCommand}" />
-      <Button Content="翻訳設定…" Command="{Binding OpenTranslationSettingsCommand}" />
-      <Button Content="表示切替" IsEnabled="False"
-              ToolTipService.ShowOnDisabled="True"
-              ToolTip="オーバーレイ表示は Phase 4 で実装します" />
+    <WrapPanel Grid.Row="1" Margin="0,0,0,12">
+      <Button Content="対象を選択…" Command="{Binding SelectTargetCommand}" Margin="0,0,8,4" />
+      <Button Content="ROI 調整…" Command="{Binding CalibrateCommand}" Margin="0,0,8,4" />
+      <Button Content="開始" Command="{Binding StartCommand}" Margin="0,0,8,4" />
+      <Button Content="停止" Command="{Binding StopCommand}" Margin="0,0,16,4" />
+      <Button Content="返信…" Command="{Binding OpenReplyCommand}" Margin="0,0,8,4" />
+      <Button Content="表示切替" Command="{Binding ToggleDisplayModeCommand}" Margin="0,0,8,4"
+              ToolTip="独立ウィンドウとオーバーレイを切り替えます（Ctrl+Alt+O）" />
+      <Button Content="オーバーレイ配置…" Command="{Binding BeginPlacementEditCommand}" Margin="0,0,8,4"
+              ToolTip="オーバーレイをドラッグで移動します。Esc か、もう一度押すと終了します" />
+      <Button Content="設定…" Command="{Binding OpenSettingsCommand}" Margin="0,0,8,4" />
       <TextBlock Text="{Binding WaitingText}" VerticalAlignment="Center" FontWeight="SemiBold" />
-    </StackPanel>
+    </WrapPanel>
 
     <Border Grid.Row="2" Margin="0,0,0,12" Padding="10,8" BorderThickness="1"
             BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
@@ -149,6 +151,10 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <TextBlock Style="{StaticResource StatusLabel}" Text="ホットキー" />
+          <TextBlock Text="{Binding HotkeyStatusText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="オーバーレイの映り込み除外" />
+          <TextBlock Text="{Binding CaptureExclusionText}" TextWrapping="Wrap" Margin="0,0,0,8" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="D2 辞書" />
           <TextBlock Text="{Binding GlossaryText}" TextWrapping="Wrap" Margin="0,0,0,8" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="OCR" />

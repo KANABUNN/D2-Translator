@@ -17,15 +17,10 @@ internal static class OpenAIRequestBuilder
     public static byte[] Build(TranslationRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        if (request.Direction != TranslationDirection.EnJa)
-        {
-            throw new NotSupportedException("日英の返信翻訳は Phase 4 で実装する。");
-        }
-
         var body = new JsonObject
         {
             ["model"] = OpenAIFixedProfile.ModelId,
-            ["instructions"] = OpenAIPrompt.IncomingInstructions,
+            ["instructions"] = request.Direction == TranslationDirection.EnJa ? OpenAIPrompt.IncomingInstructions : OpenAIPrompt.ReplyInstructions,
             ["input"] = BuildInput(request),
             ["reasoning"] = new JsonObject { ["effort"] = OpenAIFixedProfile.ReasoningEffort },
             ["service_tier"] = OpenAIFixedProfile.ServiceTier,
@@ -55,7 +50,8 @@ internal static class OpenAIRequestBuilder
         var input = new JsonObject
         {
             ["task"] = "translate",
-            ["direction"] = "en-ja",
+            ["direction"] = request.Direction == TranslationDirection.EnJa ? "en-ja" : "ja-en",
+            ["style"] = request.Direction == TranslationDirection.JaEn ? request.Style.ToString().ToLowerInvariant() : null,
             ["messageId"] = request.MessageId.ToString("D"),
             ["revision"] = request.Revision,
             ["speaker"] = request.SpeakerKey,

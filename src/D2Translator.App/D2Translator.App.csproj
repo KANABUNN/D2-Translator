@@ -6,6 +6,7 @@
     <RootNamespace>D2Translator.App</RootNamespace>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyTitle>D2 Chat Translator</AssemblyTitle>
   </PropertyGroup>
 

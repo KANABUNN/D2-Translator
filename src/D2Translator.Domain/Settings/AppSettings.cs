@@ -66,6 +66,14 @@ public sealed record DisplaySettings
     public int MaxMessages { get; init; } = 4;
 
     public bool AutoFallback { get; init; }
+
+    /// <summary>オーバーレイの幅（DIP、280〜1200）。高さは内容に合わせる。</summary>
+    public double OverlayWidthDip { get; init; } = 480;
+
+    /// <summary>オーバーレイの位置（DIP）。null なら既定の位置。可視領域外なら起動時に戻す。</summary>
+    public double? OverlayLeft { get; init; }
+
+    public double? OverlayTop { get; init; }
 }
 
 public sealed record CaptureSettings

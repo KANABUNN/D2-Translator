@@ -48,6 +48,22 @@ public static class ContextBuilder
         return lines;
     }
 
+    /// <summary>返信の英訳に添える、直近の会話（利用者が文脈の利用を選んだ時だけ、仕様書 15.2）。</summary>
+    public static IReadOnlyList<ContextLine> BuildRecent(IEnumerable<ChatMessage> history, Guid sessionId, DateTimeOffset now)
+    {
+        ArgumentNullException.ThrowIfNull(history);
+        ChatMessage[] recent = [.. history.Where(m => m.SessionId == sessionId && m.IsConversation)];
+        if (recent.Length == 0)
+        {
+            return [];
+        }
+
+        // 最新の発言の直後に仮の対象を置き、同じ規則（件数、時間、文字数）で選ぶ
+        ChatMessage last = recent.MaxBy(m => m.Sequence)!;
+        ChatMessage probe = last with { Sequence = last.Sequence + 1, ObservedAt = now, Channel = ChatChannel.Unknown };
+        return Build(recent, probe);
+    }
+
     /// <summary>
     /// 他プレイヤーの発言はチャンネルを判別できない（決定 D15）ため、Unknown はどのチャンネルとも同じ会話とみなす（決定 D19）。
     /// </summary>
