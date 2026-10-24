@@ -71,6 +71,6 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | 段階 | 状態 |
 | --- | --- |
 | Phase 0 基盤、版固定、WGC と OCR | 完了（WPF と MSIX の試作は Phase 1 で実施、D11） |
-| Phase 1 キャプチャ、ROI、独立表示 | 実装済み。Destiny 2 実機での確認が残る（[記録](docs/phase1/verification.md)） |
+| Phase 1 キャプチャ、ROI、独立表示 | 実装済み。D2 実機で取得を確認。日本語クライアントの行頭表示は Phase 2 で対応（[記録](docs/phase1/verification.md)） |
 | Phase 2 OCR、行追跡、辞書注釈 | 未着手 |
 | Phase 3〜6 | 未着手 |
