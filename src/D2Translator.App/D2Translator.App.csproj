@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <RootNamespace>D2Translator.App</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyTitle>D2 Chat Translator</AssemblyTitle>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D2Translator.Application\D2Translator.Application.csproj" />
+    <ProjectReference Include="..\D2Translator.Capture.Windows\D2Translator.Capture.Windows.csproj" />
+    <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
+    <ProjectReference Include="..\D2Translator.Infrastructure\D2Translator.Infrastructure.csproj" />
+    <ProjectReference Include="..\D2Translator.Ocr.Windows\D2Translator.Ocr.Windows.csproj" />
+  </ItemGroup>
+
+</Project>

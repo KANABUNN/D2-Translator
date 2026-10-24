@@ -1,0 +1,105 @@
+<Window x:Class="D2Translator.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:D2Translator.App.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="D2 Chat Translator"
+        Width="960" Height="720" MinWidth="720" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- 対象、取得、OpenAI、使用AI、表示方式を別々に表示する（仕様書 11.2） -->
+    <WrapPanel Grid.Row="0" Margin="0,0,0,12" AutomationProperties.Name="状態">
+      <TextBlock Style="{StaticResource StatusLabel}" Text="対象:" />
+      <TextBlock Style="{StaticResource StatusValue}" Text="{Binding TargetName}" />
+      <TextBlock Style="{StaticResource StatusLabel}" Text="取得:" />
+      <TextBlock Style="{StaticResource StatusValue}" Text="{Binding CaptureStateText}" />
+      <TextBlock Style="{StaticResource StatusLabel}" Text="クラウド翻訳:" />
+      <TextBlock Style="{StaticResource StatusValue}" Text="{Binding CloudStatusText}" />
+      <TextBlock Style="{StaticResource StatusLabel}" Text="使用AI:" />
+      <TextBlock Style="{StaticResource StatusValue}" Text="{Binding ModelText}" />
+      <TextBlock Style="{StaticResource StatusLabel}" Text="表示方式:" />
+      <TextBlock Style="{StaticResource StatusValue}" Text="{Binding DisplayModeText}" />
+    </WrapPanel>
+
+    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+      <Button Content="対象を選択…" Command="{Binding SelectTargetCommand}" />
+      <Button Content="ROI 調整…" Command="{Binding CalibrateCommand}" />
+      <Button Content="開始" Command="{Binding StartCommand}" />
+      <Button Content="停止" Command="{Binding StopCommand}" />
+      <Button Content="表示切替" IsEnabled="False"
+              ToolTipService.ShowOnDisabled="True"
+              ToolTip="オーバーレイ表示は Phase 4 で実装します" />
+      <TextBlock Text="{Binding WaitingText}" VerticalAlignment="Center" FontWeight="SemiBold" />
+    </StackPanel>
+
+    <Border Grid.Row="2" Margin="0,0,0,12" Padding="10,8" BorderThickness="1"
+            BorderBrush="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+      <Border.Style>
+        <Style TargetType="Border">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Notice}" Value="">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Border.Style>
+      <TextBlock Text="{Binding Notice}" TextWrapping="Wrap" AutomationProperties.Name="通知" />
+    </Border>
+
+    <Grid Grid.Row="3">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="2*" />
+        <ColumnDefinition Width="16" />
+        <ColumnDefinition Width="*" MinWidth="220" />
+      </Grid.ColumnDefinitions>
+
+      <DockPanel Grid.Column="0">
+        <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionHeader}" Text="認識結果（最新の観測）" />
+        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Text="{Binding LastObservationText}"
+                   Style="{StaticResource StatusLabel}" />
+        <TextBlock DockPanel.Dock="Bottom" Margin="0,6,0,0" TextWrapping="Wrap" Style="{StaticResource StatusLabel}"
+                   Text="Phase 1 の技術検証表示です。行の追跡、メッセージの確定、翻訳はまだ行いません。" />
+        <ListBox ItemsSource="{Binding Lines}" AutomationProperties.Name="認識した行"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,2">
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15" />
+                <TextBlock Text="{Binding Bounds}" Style="{StaticResource StatusLabel}" FontSize="11" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+
+      <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+          <TextBlock Style="{StaticResource SectionHeader}" Text="診断" />
+          <TextBlock Text="{Binding StatsText}" TextWrapping="Wrap" Margin="0,0,0,12" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="OCR" />
+          <TextBlock Text="{Binding OcrText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="パッケージ識別情報" />
+          <TextBlock Text="{Binding PackageText}" TextWrapping="Wrap" Margin="0,0,0,8" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="保存先" />
+          <TextBox Text="{Binding DataFolder, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                   BorderThickness="0" Background="Transparent" AutomationProperties.Name="保存先" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <TextBlock Grid.Row="4" Margin="0,12,0,0" TextWrapping="Wrap" Style="{StaticResource StatusLabel}"
+               Text="画面の取得は Windows の機能だけを使い、ゲームへの入力や介入は行いません。これはアンチチートによる許可やアカウントの安全を保証するものではありません。" />
+  </Grid>
+</Window>

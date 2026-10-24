@@ -1,6 +1,10 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/D2Translator.App/D2Translator.App.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/D2Translator.Application.Tests/D2Translator.Application.Tests.csproj" />
+    <Project Path="tests/D2Translator.Capture.Windows.Tests/D2Translator.Capture.Windows.Tests.csproj" />
     <Project Path="tests/D2Translator.Domain.Tests/D2Translator.Domain.Tests.csproj" />
     <Project Path="tests/D2Translator.Infrastructure.Tests/D2Translator.Infrastructure.Tests.csproj" />
     <Project Path="tests/D2Translator.Ocr.Windows.Tests/D2Translator.Ocr.Windows.Tests.csproj" />

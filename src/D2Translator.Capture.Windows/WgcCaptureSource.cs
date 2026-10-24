@@ -37,19 +37,26 @@ internal sealed class WgcCaptureSource(WgcCaptureTarget target, TimeProvider tim
             channel.Writer.TryComplete(new CaptureException(CaptureFailureKind.TargetClosed, "取得対象が閉じられました。"));
 
         target.Closed += OnClosed;
+        WgcFrameGrabber? grabber = null;
         try
         {
-            using (new WgcFrameGrabber(target.Item, request, channel.Writer, time))
+            // セッションの作成と破棄は取得対象を作ったスレッドで行う。フレームはフリースレッドで届く
+            grabber = await target.RunOnOwnerAsync(() => new WgcFrameGrabber(target.Item, request, channel.Writer, time))
+                .ConfigureAwait(false);
+
+            await foreach (RoiFrame frame in channel.Reader.ReadAllAsync(ct).ConfigureAwait(false))
             {
-                await foreach (RoiFrame frame in channel.Reader.ReadAllAsync(ct).ConfigureAwait(false))
-                {
-                    yield return frame;
-                }
+                yield return frame;
             }
         }
         finally
         {
             target.Closed -= OnClosed;
+            if (grabber is not null)
+            {
+                await target.RunOnOwnerAsync(grabber.Dispose).ConfigureAwait(false);
+            }
+
             channel.Writer.TryComplete();
             while (channel.Reader.TryRead(out RoiFrame? leftover))
             {

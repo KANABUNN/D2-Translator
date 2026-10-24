@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
+using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using WinRT;
 
@@ -11,6 +12,10 @@ internal static unsafe partial class Direct3D11Interop
 {
     // IDirect3DDxgiInterfaceAccess (windows.graphics.directx.direct3d11.interop.h)
     private static readonly Guid IDirect3DDxgiInterfaceAccessIid = new("A9B3D012-3DF2-4EE3-B8D1-8695F457D3C1");
+
+    // IGraphicsCaptureItemInterop (windows.graphics.capture.interop.h) と IGraphicsCaptureItem
+    private static readonly Guid IGraphicsCaptureItemInteropIid = new("3628E81B-3CAC-4C60-B7F4-23CE0E0C3356");
+    private static readonly Guid IGraphicsCaptureItemIid = new("79C3F95B-31F7-4EC2-A464-632EF5D30760");
 
     [LibraryImport("d3d11.dll")]
     private static partial int CreateDirect3D11DeviceFromDXGIDevice(nint dxgiDevice, out nint graphicsDevice);
@@ -26,6 +31,32 @@ internal static unsafe partial class Direct3D11Interop
         finally
         {
             Marshal.Release(inspectable);
+        }
+    }
+
+    public static GraphicsCaptureItem CreateItemForWindow(nint hwnd)
+    {
+        IObjectReference factory = ActivationFactory.Get("Windows.Graphics.Capture.GraphicsCaptureItem");
+        Marshal.ThrowExceptionForHR(Marshal.QueryInterface(factory.ThisPtr, in IGraphicsCaptureItemInteropIid, out nint interop));
+        try
+        {
+            // IGraphicsCaptureItemInterop::CreateForWindow は IUnknown の3メソッドの次
+            var createForWindow = (delegate* unmanaged[Stdcall]<nint, nint, Guid*, nint*, int>)(*(void***)interop)[3];
+            Guid itemIid = IGraphicsCaptureItemIid;
+            nint item;
+            Marshal.ThrowExceptionForHR(createForWindow(interop, hwnd, &itemIid, &item));
+            try
+            {
+                return GraphicsCaptureItem.FromAbi(item);
+            }
+            finally
+            {
+                Marshal.Release(item);
+            }
+        }
+        finally
+        {
+            Marshal.Release(interop);
         }
     }
 

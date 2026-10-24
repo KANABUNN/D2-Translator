@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  D2 Chat Translator の MSIX マニフェスト（仕様書 6.2）。
+  Windows.Media.Ocr の公式サポート条件に合わせ、パッケージ識別情報を持つ形で実行する。
+  $(Version) と $(Publisher) は scripts/package-msix.ps1 が置き換える。
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="KANABUN.D2ChatTranslator"
+    Publisher="$(Publisher)"
+    Version="$(Version)"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>D2 Chat Translator</DisplayName>
+    <PublisherDisplayName>KANABUN</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="ja-JP" />
+  </Resources>
+
+  <Applications>
+    <Application Id="App" Executable="D2Translator.App.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="D2 Chat Translator"
+        Description="Destiny 2 のチャットを読み取り、日本語で表示する翻訳補助"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+    </Application>
+  </Applications>
+
+  <!-- 取得はシステムの選択 UI で行うため、取得関連の追加ケーパビリティは要求しない -->
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>
