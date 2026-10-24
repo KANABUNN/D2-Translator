@@ -30,4 +30,18 @@ public static class OpenAIFixedProfile
     public const int MinMaxOutputTokens = 256;
 
     public const int MaxMaxOutputTokens = 4096;
+
+    /// <summary>API キーの保存名。設定ファイルにはキーの値でなくこの名前だけを持つ。</summary>
+    public const string SecretRef = "openai-api-key";
+
+    /// <summary>受信の英日翻訳の指示文の版。変更したら品質と遅延を再評価する。</summary>
+    public const string PromptVersion = "en-ja/2026-10-24.1";
+
+    public const string SchemaVersion = "translation-result/1";
+
+    /// <summary>
+    /// 応答の model 値として受け入れるもの（仕様書 14.2）。公式に同一モデルと確認できた ID だけを加える。
+    /// 公表されていない日付付き ID を推測で加えない（決定 D21）。
+    /// </summary>
+    public static IReadOnlySet<string> AcceptedResponseModels { get; } = new HashSet<string>(StringComparer.Ordinal) { ModelId };
 }

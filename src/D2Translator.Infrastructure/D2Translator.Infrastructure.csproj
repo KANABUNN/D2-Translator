@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\D2Translator.Application\D2Translator.Application.csproj" />
     <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
   </ItemGroup>
 

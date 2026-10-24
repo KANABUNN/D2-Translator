@@ -3,6 +3,7 @@ using System.Windows.Interop;
 using D2Translator.App.ViewModels;
 using D2Translator.App.Views;
 using D2Translator.Application.Capture;
+using D2Translator.Application.Translation;
 using D2Translator.Capture.Windows;
 using D2Translator.Domain.Capture;
 
@@ -15,10 +16,23 @@ public interface IDialogService
 
     /// <summary>ROI 調整画面を開く。保存されなければ null。</summary>
     Task<CaptureProfile?> ShowRoiCalibrationAsync(ICaptureTarget target, CaptureProfile? current);
+
+    void ShowTranslationSettings();
 }
 
-internal sealed class DialogService(OcrRuntime ocr, TimeProvider time) : IDialogService
+internal sealed class DialogService(
+    OcrRuntime ocr,
+    TimeProvider time,
+    AppSettingsService settings,
+    TranslationCoordinator translator,
+    ISecretStore secrets) : IDialogService
 {
+    public void ShowTranslationSettings()
+    {
+        var window = new TranslationSettingsWindow(new TranslationSettingsViewModel(settings, translator, secrets)) { Owner = Owner };
+        window.ShowDialog();
+    }
+
     private static Window Owner => System.Windows.Application.Current.MainWindow;
 
     public async Task<ICaptureTarget?> PickCaptureTargetAsync()

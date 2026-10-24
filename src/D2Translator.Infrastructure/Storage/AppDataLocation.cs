@@ -24,6 +24,8 @@ public sealed class AppDataLocation
 
     public string UserGlossaryPath => Path.Combine(RootDirectory, "glossary-user.json");
 
+    public string SecretsPath => Path.Combine(RootDirectory, "secrets.dpapi");
+
     public static AppDataLocation Resolve()
     {
         if (TryGetPackagedLocalFolder() is string packaged)

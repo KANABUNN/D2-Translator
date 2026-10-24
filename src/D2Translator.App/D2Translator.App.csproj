@@ -22,6 +22,7 @@
     <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
     <ProjectReference Include="..\D2Translator.Infrastructure\D2Translator.Infrastructure.csproj" />
     <ProjectReference Include="..\D2Translator.Ocr.Windows\D2Translator.Ocr.Windows.csproj" />
+    <ProjectReference Include="..\D2Translator.Translation.OpenAI\D2Translator.Translation.OpenAI.csproj" />
   </ItemGroup>
 
 </Project>

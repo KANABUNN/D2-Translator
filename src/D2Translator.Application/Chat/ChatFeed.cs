@@ -26,6 +26,9 @@ public sealed class ChatFeed(ChatLineParser parser, MessageTracker tracker, Spea
     /// <summary>バックグラウンドスレッドから発生する。</summary>
     public event EventHandler<ChatFeedUpdate>? Updated;
 
+    /// <summary>セッションが変わった。翻訳のキャッシュや文脈もこの時点で捨てる。</summary>
+    public event EventHandler<Guid>? SessionReset;
+
     /// <summary>対象の変更等で追跡基準と話者の対応表を捨てる。</summary>
     public void Reset(Guid sessionId)
     {
@@ -34,6 +37,8 @@ public sealed class ChatFeed(ChatLineParser parser, MessageTracker tracker, Spea
             tracker.Reset(sessionId);
             speakers.Clear();
         }
+
+        SessionReset?.Invoke(this, sessionId);
     }
 
     /// <summary>停止からの再開。次の観測で見えている発言は新着にしない（仕様書 15.3）。</summary>

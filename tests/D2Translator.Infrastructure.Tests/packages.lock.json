@@ -42,6 +42,11 @@
         "resolved": "18.10.1",
         "contentHash": "tV7tCyp/t+DuwQugLkCeUN7NBFFB4fEGRPr0gkMQ2nQgAvQQjmGlZZi1dsLzbyoe/A0mbnKybmkIh8qhT9p4Zw=="
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "9/qymSh7hVDMGTGwrLz8MRp5zRyXy9adGDOs4HwRdnLil3oZGYuWeZjbmHgCQ9BL1qBroVfgUK3U/nb61617Cw=="
+      },
       "Microsoft.Testing.Extensions.Telemetry": {
         "type": "Transitive",
         "resolved": "1.9.1",
@@ -157,14 +162,53 @@
           "xunit.v3.runner.common": "[3.2.2]"
         }
       },
+      "d2translator.application": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.DictionaryContext": "[0.1.0, )",
+          "D2Translator.Domain": "[0.1.0, )",
+          "D2Translator.TextTracking": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, )"
+        }
+      },
+      "d2translator.dictionarycontext": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Domain": "[0.1.0, )",
+          "D2Translator.TextTracking": "[0.1.0, )"
+        }
+      },
       "d2translator.domain": {
         "type": "Project"
       },
       "d2translator.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "D2Translator.Application": "[0.1.0, )",
+          "D2Translator.Domain": "[0.1.0, )",
+          "System.Security.Cryptography.ProtectedData": "[10.0.12, )"
+        }
+      },
+      "d2translator.texttracking": {
+        "type": "Project",
+        "dependencies": {
           "D2Translator.Domain": "[0.1.0, )"
         }
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "+24lC4plfbEDNfLAdTV/SWKS7dW+16X4HdydO3R++134kSNTzcbYA4KpR1Hdh6uWisB8Za3AzwyOn+K+NxWIug==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.12"
+        }
+      },
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "wO0W8VDMeRJZakRySOmemAnrBZMwEFRlbfBtATxUiLf2I3IhSRnCp1Vt157NWptdE4IJ7eftd5n8q9LtaKHFTQ=="
       }
     },
     "net10.0-windows10.0.19041/win-x64": {

@@ -31,6 +31,7 @@
 | Microsoft.Extensions.Logging | 10.0.12 | 2026-09-08 | ログ（本文とキーは記録しない） | 6.1 |
 | Microsoft.Extensions.Logging.Abstractions | 10.0.12 | 2026-09-08 | 同上 | 6.1 |
 | Microsoft.Extensions.Logging.Debug | 10.0.12 | 2026-09-08 | 開発時のログ出力 | 6.1 |
+| System.Security.Cryptography.ProtectedData | 10.0.12 | 2026-09-08 | API キーの DPAPI 保護（Phase 3 で追加） | S20 |
 
 ### 試験用
 

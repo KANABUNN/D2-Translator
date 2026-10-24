@@ -117,6 +117,7 @@
       "d2translator.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "D2Translator.Application": "[0.1.0, )",
           "D2Translator.Domain": "[0.1.0, )"
         }
       },
@@ -132,6 +133,14 @@
         "type": "Project",
         "dependencies": {
           "D2Translator.Domain": "[0.1.0, )"
+        }
+      },
+      "d2translator.translation.openai": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Application": "[0.1.0, )",
+          "D2Translator.Domain": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, )"
         }
       },
       "Microsoft.Extensions.Logging.Abstractions": {

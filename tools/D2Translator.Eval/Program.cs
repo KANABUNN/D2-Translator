@@ -9,18 +9,30 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
-// 使い方: D2Translator.Eval <フォルダー> [--lang en-US] [--client ja] [--scale 2]
+// 使い方:
+//   D2Translator.Eval <フォルダー> [--lang en-US] [--client ja] [--scale 2]
+//   D2Translator.Eval translate <英文の一覧.txt> <結果.tsv> [--yes]
 //
-// フォルダー内の画像（png/jpg）ごとに、同名の .txt を正解として読む。正解の各行は次のどちらか。
+// OCR の評価: フォルダー内の画像（png/jpg）ごとに、同名の .txt を正解として読む。正解の各行は次のどちらか。
 //   本文だけを比べる行:   > Sounds bugged
 //   行全体を比べる行:     [ファイアチーム]宛て: Need two more
 // 空行と # で始まる行は無視する。正解ファイルがない画像は認識結果だけを表示する。
 // 評価画像には他プレイヤーの名前が写るため、リポジトリに入れない（eval-data/ は .gitignore 済み）。
+//
+// 翻訳の評価（仕様書 16.3 P08、P09）: 英文を 1 行 1 例で GPT-6 Luna に送り、評価者 2 名が採点する TSV を作る。
+// アプリで登録した API キー（DPAPI）を使い、API 利用料が生じる。--yes がなければ件数と推計費用だけを表示する。
 
 if (args.Length == 0)
 {
     Console.Error.WriteLine("usage: D2Translator.Eval <folder> [--lang en-US] [--client ja] [--scale 2]");
+    Console.Error.WriteLine("       D2Translator.Eval translate <input.txt> <output.tsv> [--yes]");
     return 2;
+}
+
+if (args[0] == "translate")
+{
+    Console.OutputEncoding = System.Text.Encoding.UTF8;
+    return await TranslationEval.RunAsync(args[1..]);
 }
 
 string folder = Path.GetFullPath(args[0]);

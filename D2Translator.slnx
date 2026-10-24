@@ -10,6 +10,7 @@
     <Project Path="tests/D2Translator.Infrastructure.Tests/D2Translator.Infrastructure.Tests.csproj" />
     <Project Path="tests/D2Translator.Ocr.Windows.Tests/D2Translator.Ocr.Windows.Tests.csproj" />
     <Project Path="tests/D2Translator.TextTracking.Tests/D2Translator.TextTracking.Tests.csproj" />
+    <Project Path="tests/D2Translator.Translation.OpenAI.Tests/D2Translator.Translation.OpenAI.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/D2Translator.Eval/D2Translator.Eval.csproj" />
@@ -21,4 +22,5 @@
   <Project Path="src/D2Translator.Infrastructure/D2Translator.Infrastructure.csproj" />
   <Project Path="src/D2Translator.Ocr.Windows/D2Translator.Ocr.Windows.csproj" />
   <Project Path="src/D2Translator.TextTracking/D2Translator.TextTracking.csproj" />
+  <Project Path="src/D2Translator.Translation.OpenAI/D2Translator.Translation.OpenAI.csproj" />
 </Solution>

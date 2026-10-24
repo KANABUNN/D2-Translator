@@ -38,6 +38,7 @@
       <Button Content="ROI 調整…" Command="{Binding CalibrateCommand}" />
       <Button Content="開始" Command="{Binding StartCommand}" />
       <Button Content="停止" Command="{Binding StopCommand}" />
+      <Button Content="翻訳設定…" Command="{Binding OpenTranslationSettingsCommand}" />
       <Button Content="表示切替" IsEnabled="False"
               ToolTipService.ShowOnDisabled="True"
               ToolTip="オーバーレイ表示は Phase 4 で実装します" />
@@ -68,7 +69,7 @@
       <DockPanel Grid.Column="0">
         <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionHeader}" Text="受信履歴" />
         <TextBlock DockPanel.Dock="Bottom" Margin="0,6,0,0" TextWrapping="Wrap" Style="{StaticResource StatusLabel}"
-                   Text="翻訳は Phase 3 で実装します。現在は会話の原文と、D2 辞書・話者名の注釈だけを表示します。参加通知などのシステム表示は表示しません。" />
+                   Text="他プレイヤーの発言は、クラウド翻訳が有効なら GPT-6 Luna で日本語に翻訳します。参加通知などのシステム表示と自分の発言は翻訳せず、システム表示は履歴にも表示しません。" />
         <ListBox x:Name="MessageList" ItemsSource="{Binding Messages}" AutomationProperties.Name="受信履歴"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch">
           <ListBox.ItemTemplate>
@@ -85,6 +86,34 @@
                     <TextBlock Text="{Binding Status}" Style="{StaticResource StatusLabel}" />
                   </WrapPanel>
                   <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="15" />
+                  <TextBlock Text="{Binding Translation}" TextWrapping="Wrap" FontSize="15" FontWeight="SemiBold" Margin="0,2,0,0">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding HasTranslation}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <TextBlock Text="{Binding TranslationNote}" TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0"
+                             Style="{StaticResource StatusLabel}">
+                  </TextBlock>
+                  <Button Content="翻訳" HorizontalAlignment="Left" Padding="8,1" MinWidth="0" Margin="0,4,0,0"
+                          Command="{Binding DataContext.TranslateMessageCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                          CommandParameter="{Binding MessageId}"
+                          ToolTip="この発言を GPT-6 Luna で翻訳します（API 利用料が生じ得ます）">
+                    <Button.Style>
+                      <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding CanTranslate}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Button.Style>
+                  </Button>
                   <TextBlock Text="{Binding Annotations}" TextWrapping="Wrap" FontSize="12" Margin="0,2,0,0"
                              Foreground="{DynamicResource {x:Static SystemColors.HotTrackBrushKey}}">
                     <TextBlock.Style>
@@ -109,6 +138,8 @@
           <TextBlock Style="{StaticResource SectionHeader}" Text="診断" />
           <TextBlock Text="{Binding StatsText}" TextWrapping="Wrap" Margin="0,0,0,4" />
           <TextBlock Text="{Binding HiddenText}" TextWrapping="Wrap" Margin="0,0,0,12" />
+          <TextBlock Style="{StaticResource StatusLabel}" Text="翻訳の利用量（この実行中）" />
+          <TextBlock Text="{Binding UsageText}" TextWrapping="Wrap" Margin="0,0,0,12" />
           <TextBlock Style="{StaticResource StatusLabel}" Text="最新の観測（組み立てた行）" />
           <TextBlock Text="{Binding LastObservationText}" TextWrapping="Wrap" FontSize="11" Style="{StaticResource StatusLabel}" />
           <ItemsControl ItemsSource="{Binding Lines}" Margin="0,2,0,12" AutomationProperties.Name="最新の観測">

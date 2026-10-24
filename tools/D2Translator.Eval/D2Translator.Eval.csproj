@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- 仕様書 16.3 P05 の文字誤り率を、正解付きの静止画像で測る開発用ツール -->
+  <!-- 開発用の評価ツール。OCR の文字誤り率（P05）と、翻訳品質の採点用 TSV（P08、P09） -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\D2Translator.DictionaryContext\D2Translator.DictionaryContext.csproj" />
+    <ProjectReference Include="..\..\src\D2Translator.Infrastructure\D2Translator.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\D2Translator.Ocr.Windows\D2Translator.Ocr.Windows.csproj" />
     <ProjectReference Include="..\..\src\D2Translator.TextTracking\D2Translator.TextTracking.csproj" />
+    <ProjectReference Include="..\..\src\D2Translator.Translation.OpenAI\D2Translator.Translation.OpenAI.csproj" />
   </ItemGroup>
 
 </Project>

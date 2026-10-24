@@ -26,6 +26,14 @@
       "d2translator.domain": {
         "type": "Project"
       },
+      "d2translator.infrastructure": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Application": "[0.1.0, )",
+          "D2Translator.Domain": "[0.1.0, )",
+          "System.Security.Cryptography.ProtectedData": "[10.0.12, )"
+        }
+      },
       "d2translator.ocr.windows": {
         "type": "Project",
         "dependencies": {
@@ -40,6 +48,14 @@
           "D2Translator.Domain": "[0.1.0, )"
         }
       },
+      "d2translator.translation.openai": {
+        "type": "Project",
+        "dependencies": {
+          "D2Translator.Application": "[0.1.0, )",
+          "D2Translator.Domain": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.12, )"
+        }
+      },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "CentralTransitive",
         "requested": "[10.0.12, )",
@@ -48,6 +64,12 @@
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.12"
         }
+      },
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.12, )",
+        "resolved": "10.0.12",
+        "contentHash": "wO0W8VDMeRJZakRySOmemAnrBZMwEFRlbfBtATxUiLf2I3IhSRnCp1Vt157NWptdE4IJ7eftd5n8q9LtaKHFTQ=="
       }
     },
     "net10.0-windows10.0.19041/win-x64": {}

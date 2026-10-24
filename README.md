@@ -4,7 +4,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 
 ゲーム画面に表示された英語チャットを OS の画面取得と端末内 OCR で読み取り、日本語で表示します。日本語の返信を英訳し、利用者が確認してコピーできます。ゲームへの貼り付けと送信は利用者自身が行います。
 
-> **状態: 開発中（Phase 2 実装済み）** — 画面取得、OCR、発言の追跡、D2 辞書の注釈まで動きます。翻訳はまだ行いません（Phase 3）。
+> **状態: 開発中（Phase 3 実装済み）** — 画面取得、OCR、発言の追跡、D2 辞書の注釈、GPT-6 Luna による受信の英日翻訳まで動きます。日本語の返信の英訳とオーバーレイは Phase 4 です。
 
 ## 仕様と記録
 
@@ -13,6 +13,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 - [Phase 0 版固定表](docs/phase0/version-pinning.md)
 - [Phase 1 技術検証記録](docs/phase1/verification.md)
 - [Phase 2 実施記録](docs/phase2/report.md)
+- [Phase 3 実施記録](docs/phase3/report.md)
 
 主な設計方針:
 
@@ -35,8 +36,9 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 | `src/D2Translator.Ocr.Windows` | Windows.Media.Ocr の呼出し、前処理、2言語の結果の合成 |
 | `src/D2Translator.TextTracking` | 行の組み立て、行の解析、発言の追跡、話者の一時 ID、文字誤り率 |
 | `src/D2Translator.DictionaryContext` | D2 辞書の検証付き読み込みと照合 |
-| `src/D2Translator.Infrastructure` | 保存先の解決、検証付き JSON の原子的な保存 |
-| `tools/D2Translator.Eval` | 正解付き画像で OCR の文字誤り率を測る開発用ツール |
+| `src/D2Translator.Translation.OpenAI` | OpenAI Responses API（gpt-6-luna 固定）の要求、応答の検証、再試行 |
+| `src/D2Translator.Infrastructure` | 保存先の解決、検証付き JSON の原子的な保存、API キーの DPAPI 保護 |
+| `tools/D2Translator.Eval` | OCR の文字誤り率の測定と、翻訳品質の採点用 TSV の作成を行う開発用ツール |
 
 ## ビルドと試験
 
@@ -64,6 +66,12 @@ OCR の評価（画像と同名の .txt に正解を書く。評価画像は他�
 dotnet run --project tools/D2Translator.Eval -- eval-data
 ```
 
+翻訳品質の採点用 TSV の作成（英文を 1 行 1 例で用意する。`--yes` を付けると実際に送信し、API 利用料が生じる）:
+
+```bash
+dotnet run --project tools/D2Translator.Eval -- translate eval-data/translation.txt eval-data/translation.tsv
+```
+
 MSIX パッケージの作成（署名は証明書の拇印を渡した場合のみ。スクリプトは証明書の作成や OS 設定の変更を行いません）:
 
 ```bash
@@ -83,5 +91,15 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 | Phase 0 基盤、版固定、WGC と OCR | 完了（WPF と MSIX の試作は Phase 1 で実施、D11） |
 | Phase 1 キャプチャ、ROI、独立表示 | 実装済み。D2 実機で取得を確認。日本語クライアントの行頭表示は Phase 2 で対応（[記録](docs/phase1/verification.md)） |
 | Phase 2 OCR、行追跡、辞書注釈 | 実装済み。受入評価用の画像の収集と、実機での追跡確認が残る（[記録](docs/phase2/report.md)） |
-| Phase 3 辞書、文脈、GPT-6 Luna 接続 | 未着手 |
-| Phase 4〜6 | 未着手 |
+| Phase 3 辞書、文脈、GPT-6 Luna 接続 | 実装済み。実 API での接続確認と翻訳品質の評価が残る（[記録](docs/phase3/report.md)） |
+| Phase 4 C方式、返信入力、コピー、設定の統合 | 未着手 |
+| Phase 5〜6 | 未着手 |
+
+## クラウド翻訳の使い方
+
+1. 「翻訳設定…」を開き、外部へ送信する内容を確認して「上記の内容を確認しました」を選ぶ。
+2. 「クラウド翻訳を有効にする」を選ぶ。
+3. 自分の OpenAI API キーを登録する（Windows のユーザー単位で暗号化して保存し、値は再表示しない）。
+4. 「接続確認」で 1 回だけ翻訳を試す（API 利用料が生じ得る）。
+
+OpenAI 側でも予算上限を設定してください。アプリの推計額は請求額を保証しません。

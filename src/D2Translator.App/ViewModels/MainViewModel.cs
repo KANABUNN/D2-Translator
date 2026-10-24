@@ -6,7 +6,9 @@ using D2Translator.App.Presentation;
 using D2Translator.App.Services;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Chat;
+using D2Translator.Application.Translation;
 using D2Translator.Capture.Windows;
+using D2Translator.Domain.Chat;
 using D2Translator.Domain.Capture;
 using D2Translator.Domain.Errors;
 using D2Translator.Domain.Ocr;
@@ -27,43 +29,45 @@ public sealed partial class MainViewModel : ObservableObject
     private const int MaxHistory = 1000;
 
     private readonly Dictionary<Guid, MessageItem> _messageIndex = [];
+    private readonly Dictionary<Guid, ChatMessage> _messages = [];
+    private readonly Dictionary<Guid, TranslationView> _translations = [];
     private int _hiddenCount;
     private readonly CaptureController _controller;
-    private readonly SettingsRepository _settingsRepository;
+    private readonly AppSettingsService _settings;
+    private readonly TranslationCoordinator _translator;
     private readonly CaptureProfileRepository _profiles;
     private readonly OcrRuntime _ocr;
     private readonly IDialogService _dialogs;
     private readonly ILogger<MainViewModel> _logger;
     private readonly Dispatcher _dispatcher;
-    private readonly bool _settingsWritable;
-    private AppSettings _settings;
 
     public MainViewModel(
         CaptureController controller,
-        SettingsRepository settingsRepository,
+        AppSettingsService settings,
         SettingsLoadResult settingsLoad,
         CaptureProfileRepository profiles,
         OcrRuntime ocr,
         GlossaryRuntime glossary,
         ChatFeed feed,
+        TranslationCoordinator translator,
         AppDataLocation location,
         IDialogService dialogs,
         ILogger<MainViewModel> logger)
     {
         _controller = controller;
-        _settingsRepository = settingsRepository;
+        _settings = settings;
+        _translator = translator;
         _profiles = profiles;
         _ocr = ocr;
         _dialogs = dialogs;
         _logger = logger;
         _dispatcher = Dispatcher.CurrentDispatcher;
-        _settings = settingsLoad.Settings;
-        // 不正な設定ファイルは上書きしない（仕様書 13.4）
-        _settingsWritable = settingsLoad.Status != SettingsLoadStatus.Invalid;
 
         TargetName = "未選択";
         CaptureStateText = StatusLabels.Of(CaptureState.Idle);
-        CloudStatusText = _settings.Translation.CloudEnabled ? "有効" : "無効";
+        CloudStatusText = string.Empty;
+        UsageText = string.Empty;
+        UpdateTranslationStatus();
         ModelText = $"{OpenAIFixedProfile.ModelDisplayName}（{OpenAIFixedProfile.ModelId}、推論量 {OpenAIFixedProfile.ReasoningEffort}）";
         DisplayModeText = "独立ウィンドウ";
         Notice = string.Empty;
@@ -92,7 +96,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
         else if (ocr.ClientLanguageMissing)
         {
-            notices.Add($"OCR01 ゲーム表示言語（{_settings.Ocr.ClientLanguage}）の OCR がないため、行頭のチャンネル表示とシステムメッセージを読めません。" +
+            notices.Add($"OCR01 ゲーム表示言語（{_settings.Current.Ocr.ClientLanguage}）の OCR がないため、行頭のチャンネル表示とシステムメッセージを読めません。" +
                 "Windows の設定で日本語の言語機能（OCR）を追加してください。");
         }
 
@@ -115,7 +119,12 @@ public sealed partial class MainViewModel : ObservableObject
         _controller.WaitingForFramesChanged += (_, waiting) => _dispatcher.InvokeAsync(() =>
             WaitingText = waiting ? $"待機中: 新しいフレームが届いていません（{CaptureController.FrameStallThreshold.TotalSeconds:0}秒以上）" : string.Empty);
         feed.Updated += (_, update) => _dispatcher.InvokeAsync(() => ApplyUpdate(update));
+        translator.Updated += (_, view) => _dispatcher.InvokeAsync(() => ApplyTranslation(view));
+        translator.StateChanged += (_, _) => _dispatcher.InvokeAsync(UpdateTranslationStatus);
     }
+
+    [ObservableProperty]
+    public partial string UsageText { get; set; }
 
     /// <summary>最新の観測で組み立てた行（診断用）。</summary>
     public ObservableCollection<OcrLineItem> Lines { get; } = [];
@@ -202,7 +211,7 @@ public sealed partial class MainViewModel : ObservableObject
             Lines.Clear();
 
             // 保存した ROI を再検証し、使えなければ調整画面を開く
-            CaptureProfile? saved = _settings.Capture.ActiveProfileId is Guid id ? _profiles.Find(id) : null;
+            CaptureProfile? saved = _settings.Current.Capture.ActiveProfileId is Guid id ? _profiles.Find(id) : null;
             if (saved is not null && _controller.TryApplyProfile(saved, OcrMaxDimension).IsOk)
             {
                 return;
@@ -263,11 +272,7 @@ public sealed partial class MainViewModel : ObservableObject
         try
         {
             _profiles.Upsert(profile);
-            _settings = _settings with { Capture = _settings.Capture with { ActiveProfileId = profile.Id } };
-            if (_settingsWritable)
-            {
-                _settingsRepository.Save(_settings);
-            }
+            _settings.Update(s => s with { Capture = s.Capture with { ActiveProfileId = profile.Id } });
         }
         catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException or InvalidOperationException)
         {
@@ -282,8 +287,19 @@ public sealed partial class MainViewModel : ObservableObject
     private void Start()
     {
         WaitingText = string.Empty;
-        _controller.Start(_settings.Capture.OcrRate);
+        _controller.Start(_settings.Current.Capture.OcrRate);
     }
+
+    [RelayCommand]
+    private void OpenTranslationSettings()
+    {
+        _dialogs.ShowTranslationSettings();
+        UpdateTranslationStatus();
+    }
+
+    /// <summary>利用者の明示操作による翻訳（開始前から表示、要確認、失敗、期限切れ、訂正後）。</summary>
+    [RelayCommand]
+    private void TranslateMessage(Guid messageId) => _translator.RequestManual(messageId);
 
     /// <summary>
     /// ウィンドウを閉じる前に取得を止める。取得対象の破棄は UI スレッドへ戻して行うため、
@@ -359,6 +375,8 @@ public sealed partial class MainViewModel : ObservableObject
 
         if (update.Kind == MessageUpdateKind.Removed)
         {
+            _messages.Remove(id);
+            _translations.Remove(id);
             if (_messageIndex.Remove(id, out MessageItem? removed))
             {
                 Messages.Remove(removed);
@@ -367,7 +385,25 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        var item = MessageItem.From(update.Message);
+        _messages[id] = update.Message;
+        Render(id);
+    }
+
+    private void ApplyTranslation(TranslationView view)
+    {
+        _translations[view.MessageId] = view;
+        if (_messages.ContainsKey(view.MessageId))
+        {
+            Render(view.MessageId);
+        }
+
+        UpdateUsage();
+    }
+
+    /// <summary>原文と訳文の両方を1行にまとめて表示する（仕様書 11.2）。</summary>
+    private void Render(Guid id)
+    {
+        var item = MessageItem.From(_messages[id], _translations.GetValueOrDefault(id));
         if (_messageIndex.TryGetValue(id, out MessageItem? existing))
         {
             int index = Messages.IndexOf(existing);
@@ -381,12 +417,48 @@ public sealed partial class MainViewModel : ObservableObject
             Messages.Add(item);
             while (Messages.Count > MaxHistory)
             {
-                _messageIndex.Remove(Messages[0].MessageId);
+                Guid oldest = Messages[0].MessageId;
+                _messageIndex.Remove(oldest);
+                _messages.Remove(oldest);
+                _translations.Remove(oldest);
                 Messages.RemoveAt(0);
             }
         }
 
         _messageIndex[id] = item;
+    }
+
+    private void UpdateTranslationStatus()
+    {
+        (TranslationServiceState state, string detail) = _translator.Status;
+        CloudStatusText = state switch
+        {
+            TranslationServiceState.Disabled => "無効",
+            TranslationServiceState.Ready => "有効",
+            TranslationServiceState.NoApiKey => "有効（API キー未登録）",
+            TranslationServiceState.CircuitOpen => "一時停止（通信障害）",
+            TranslationServiceState.LimitReached => "停止（上限到達）",
+            _ => "停止",
+        };
+
+        // 翻訳サービスの障害は通知欄にも出す。取得やローカル OCR は止めない（仕様書 15.3）
+        if (state is TranslationServiceState.Stopped or TranslationServiceState.LimitReached or TranslationServiceState.NoApiKey)
+        {
+            Notice = $"クラウド翻訳: {detail}";
+        }
+
+        UpdateUsage();
+    }
+
+    private void UpdateUsage()
+    {
+        UsageSnapshot usage = _translator.Usage;
+        UsageText = usage.Requests == 0 && usage.CacheHits == 0
+            ? "翻訳要求はまだありません。"
+            : $"要求 {usage.Requests} 回（HTTP {usage.HttpAttempts} 回、成功 {usage.Succeeded}、キャッシュ {usage.CacheHits}）{Environment.NewLine}" +
+              $"入力 {usage.InputTokens}（うちキャッシュ {usage.CachedInputTokens}）/ 出力 {usage.OutputTokens} トークン{Environment.NewLine}" +
+              $"推計 {usage.EstimatedUsd:0.000000} 米ドル（{OpenAIPricing.ReferenceDate:yyyy-MM-dd} 時点の公表単価、請求額の保証ではありません）" +
+              (usage.UnknownUsage > 0 ? $"{Environment.NewLine}料金未確定 {usage.UnknownUsage} 回" : string.Empty);
     }
 
     private static string Ms(TimeSpan? value) => value is TimeSpan v ? $"{v.TotalMilliseconds:0} ms" : "-";

@@ -5,6 +5,8 @@ using D2Translator.App.Views;
 using D2Translator.Application.Capture;
 using D2Translator.Application.Chat;
 using D2Translator.Application.Ocr;
+using D2Translator.Application.Translation;
+using D2Translator.Translation.OpenAI;
 using D2Translator.Infrastructure.Storage;
 using D2Translator.TextTracking.Parsing;
 using D2Translator.TextTracking.Speakers;
@@ -62,6 +64,10 @@ public partial class App : System.Windows.Application
         services.AddSingleton(_ => AppDataLocation.Resolve());
         services.AddSingleton<SettingsRepository>();
         services.AddSingleton(sp => sp.GetRequiredService<SettingsRepository>().Load());
+        services.AddSingleton<AppSettingsService>();
+        services.AddSingleton<ISecretStore, DpapiSecretStore>();
+        services.AddSingleton(_ => OpenAIResponsesProvider.CreateHttpClient());
+        services.AddSingleton<ITranslationProvider, OpenAIResponsesProvider>();
         services.AddSingleton<CaptureProfileRepository>();
         services.AddSingleton(sp => OcrRuntime.Create(
             sp.GetRequiredService<SettingsLoadResult>().Settings.Ocr,
@@ -79,6 +85,13 @@ public partial class App : System.Windows.Application
         {
             Activity = sp.GetRequiredService<SettingsLoadResult>().Settings.Context.Activity,
         });
+        services.AddSingleton(sp => new TranslationCoordinator(
+            sp.GetRequiredService<ChatFeed>(),
+            sp.GetRequiredService<ITranslationProvider>(),
+            sp.GetRequiredService<ISecretStore>(),
+            TranslationOptions.From(sp.GetRequiredService<AppSettingsService>().Current),
+            sp.GetRequiredService<TimeProvider>(),
+            sp.GetRequiredService<ILogger<TranslationCoordinator>>()));
         services.AddSingleton<ReceivePipeline>();
         services.AddSingleton<CaptureController>();
         services.AddSingleton<IDialogService, DialogService>();
