@@ -130,6 +130,26 @@ public class MessageTrackerTests
     }
 
     [Fact]
+    public void Noisier_reading_is_not_accepted_as_a_revision()
+    {
+        // チャットが薄れてコロンが •. に読まれた場合
+        MessageTracker tracker = Baseline(P("A#1", "Sounds broken"));
+
+        Assert.Empty(tracker.Apply([P("A#1", "•. Sounds broken")], Now, Ms(1000)));
+        Assert.Empty(tracker.Apply([P("A#1", "•. Sounds broken")], Now, Ms(1300)));
+        Assert.Empty(tracker.Apply([P("A#1", "•. Sounds broken")], Now, Ms(1600)));
+    }
+
+    [Fact]
+    public void Late_change_is_not_accepted_as_a_revision()
+    {
+        MessageTracker tracker = Baseline(P("A#1", "Just type y or m"));
+
+        Assert.Empty(tracker.Apply([P("A#1", "Just type y or n")], Now, Ms(6000)));
+        Assert.Empty(tracker.Apply([P("A#1", "Just type y or n")], Now, Ms(6300)));
+    }
+
+    [Fact]
     public void Pending_ghost_that_disappears_is_removed()
     {
         MessageTracker tracker = Baseline(P("A#1", "hello there"));

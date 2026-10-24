@@ -56,7 +56,10 @@ public sealed class ChatFeed(ChatLineParser parser, MessageTracker tracker, Spea
         Publish(() =>
         {
             IReadOnlyList<ChatCandidate> candidates = parser.Parse(observation.Lines, observation.RoiBounds);
-            foreach (ChatCandidate candidate in candidates.Where(c => c.Speaker is not null))
+            // 一時 ID を振るのは発言の話者と、名前#識別番号 の形で読めた参加通知の名前だけ。
+            // チャット以外の表示から拾った文字列を話者として登録しない
+            foreach (ChatCandidate candidate in candidates.Where(c => c.Speaker is not null &&
+                (c.Kind == ChatLineKind.Player || SpeakerRegistry.IsReliableName(c.Speaker))))
             {
                 speakers.Register(candidate.Speaker!);
             }
@@ -85,12 +88,13 @@ public sealed class ChatFeed(ChatLineParser parser, MessageTracker tracker, Spea
 
     private ChatMessage Enrich(ChatMessage message)
     {
-        string? speakerKey = message.SpeakerName is null ? null : speakers.Register(message.SpeakerName);
         if (message.Kind == ChatLineKind.System)
         {
-            return message with { SpeakerKey = speakerKey };
+            // システム表示は履歴と翻訳の対象外（決定 D18）。一時 ID も注釈も付けない
+            return message;
         }
 
+        string? speakerKey = message.SpeakerName is null ? null : speakers.Register(message.SpeakerName);
         IEnumerable<TextAnnotation> annotations = speakers.FindMentions(message.Text).Concat(glossary.Find(message.Text, Activity));
         return message with
         {

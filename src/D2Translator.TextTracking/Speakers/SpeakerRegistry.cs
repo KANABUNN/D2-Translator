@@ -94,6 +94,10 @@ public sealed class SpeakerRegistry
         return AnnotationSet.KeepLongestNonOverlapping(found);
     }
 
+    /// <summary>名前#識別番号 の形か。識別番号は OCR で英字に誤読され得るため英数字 3 文字以上を許す。</summary>
+    public static bool IsReliableName(string speakerName) =>
+        Regex.IsMatch(speakerName, @"^[^\s#\[\]]{2,}#[0-9A-Za-z]{3,6}$", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50));
+
     /// <summary># の後の識別番号を除いた表示名。</summary>
     public static string DisplayName(string speakerName)
     {
@@ -107,6 +111,13 @@ public sealed class SpeakerRegistry
     /// </summary>
     private static Regex? BuildMentionPattern(string speakerName)
     {
+        // Bungie 名の形（名前#識別番号）で読めた名前だけを呼びかけの検出に使う。
+        // 崩れた行頭やチャット以外の表示から拾った文字列で、一般語を名前と誤認しないため
+        if (!IsReliableName(speakerName))
+        {
+            return null;
+        }
+
         string display = DisplayName(speakerName);
         if (display.Length < 3)
         {

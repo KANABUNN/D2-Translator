@@ -57,6 +57,28 @@ public class SpeakerRegistryTests
     }
 
     [Fact]
+    public void Names_without_a_bungie_code_are_not_used_for_mentions()
+    {
+        var registry = new SpeakerRegistry();
+        registry.Register("the");
+        registry.Register("Ready up");
+        registry.Register("Kestrel");
+
+        Assert.Empty(registry.FindMentions("Kestrel the ready up team"));
+    }
+
+    [Theory]
+    [InlineData("Kestrel#5678", true)]
+    [InlineData("Kestrel#l2E4", true)]
+    [InlineData("Kestrel#", false)]
+    [InlineData("Kestrel", false)]
+    [InlineData("[Kestrel#5678", false)]
+    public void Reliable_names_have_a_code(string name, bool expected)
+    {
+        Assert.Equal(expected, SpeakerRegistry.IsReliableName(name));
+    }
+
+    [Fact]
     public void Display_name_drops_the_code()
     {
         Assert.Equal("Pancake916", SpeakerRegistry.DisplayName("Pancake916#1234"));

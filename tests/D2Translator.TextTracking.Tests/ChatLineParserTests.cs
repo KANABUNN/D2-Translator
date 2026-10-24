@@ -133,6 +133,35 @@ public class ChatLineParserTests
         Assert.Equal("Kestrel can u hear me?", candidates[2].Body);
     }
 
+    [Theory]
+    [InlineData("[Kestrel#5678]•. Sounds broken")]
+    [InlineData("[Kestrel#5678]:•. Sounds broken")]
+    [InlineData("[Kestrel#5678]: •. Sounds broken")]
+    [InlineData("[Kestrel#5678]・Sounds broken")]
+    public void Colon_misread_as_dots_is_not_left_in_the_body(string row)
+    {
+        ChatCandidate candidate = Assert.Single(Parser.Parse([Row(0, row)], Roi));
+
+        Assert.Equal(("Kestrel#5678", "Sounds broken", false), (candidate.Speaker, candidate.Body, candidate.IsUncertain));
+    }
+
+    [Fact]
+    public void Damaged_prefix_with_dots_is_cleaned()
+    {
+        ChatCandidate candidate = Assert.Single(Parser.Parse([Row(0, "[Kestrel#5678 •. Sounds broken")], Roi));
+
+        Assert.Equal(("Kestrel#5678", "Sounds broken"), (candidate.Speaker, candidate.Body));
+    }
+
+    [Theory]
+    [InlineData("[Kestrel#5678]: :) nice", ":) nice")]
+    [InlineData("[Kestrel#5678]: ...?", "...?")]
+    [InlineData("[Kestrel#5678]: 3.5 dps", "3.5 dps")]
+    public void Legitimate_leading_symbols_are_kept(string row, string body)
+    {
+        Assert.Equal(body, Assert.Single(Parser.Parse([Row(0, row)], Roi)).Body);
+    }
+
     [Fact]
     public void Input_row_below_a_wide_gap_is_ignored()
     {

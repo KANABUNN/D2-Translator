@@ -71,7 +71,8 @@ public sealed class ChatFormat
         ],
         PlayerMessagePatterns =
         [
-            Pattern(@"^\[(?<speaker>[^\[\]]{1,40})\]\s*:\s*(?<body>.*)$"),
+            // チャットが薄れるとコロンが •. や ・ 等に読まれるため、区切りの誤読も受け付ける
+            Pattern(@"^\[(?<speaker>[^\[\]]{1,40})\]\s*[:;•·・.。]{1,3}\s*(?<body>.*)$"),
             // 括弧を読み落とした場合。話者名に # がある時だけ受け付ける
             Pattern(@"^\[?(?<speaker>[^\[\]:\s]{1,40}#[^\[\]:\s]{0,10})\]?\s*:\s*(?<body>.*)$"),
         ],

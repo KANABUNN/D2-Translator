@@ -96,13 +96,13 @@ public sealed class ChatLineParser(ChatFormat format)
         if (Match(Format.OwnMessagePatterns, text) is Match own)
         {
             (string label, ChatChannel channel) = Format.ResolveChannel(own.Groups["label"].Value.Trim());
-            return new Builder(ChatLineKind.Own, null, label, channel, own.Groups["body"].Value.Trim(), row);
+            return new Builder(ChatLineKind.Own, null, label, channel, ReadingQuality.CleanBody(own.Groups["body"].Value), row);
         }
 
         if (Match(Format.PlayerMessagePatterns, text) is Match player)
         {
             return new Builder(ChatLineKind.Player, player.Groups["speaker"].Value.Trim(), null, ChatChannel.Unknown,
-                player.Groups["body"].Value.Trim(), row);
+                ReadingQuality.CleanBody(player.Groups["body"].Value), row);
         }
 
         if (Match(Format.SpeakerNoticePatterns, text) is Match notice)
@@ -132,9 +132,9 @@ public sealed class ChatLineParser(ChatFormat format)
             return (text[1..].Trim(), string.Empty);
         }
 
-        string speaker = text[1..split].Trim().TrimEnd('.', ',', '#', ' ');
-        string body = text[(split + 1)..].TrimStart(']', ':', ';', '」', '}', '.', ',', ' ');
-        return (speaker, body);
+        string speaker = text[1..split].Trim().TrimEnd('.', ',', '#', ' ', '•', '·', '・');
+        string body = text[(split + 1)..].TrimStart(']', ':', ';', '」', '}', '.', ',', ' ', '•', '·', '・');
+        return (speaker, ReadingQuality.CleanBody(body));
     }
 
     /// <summary>

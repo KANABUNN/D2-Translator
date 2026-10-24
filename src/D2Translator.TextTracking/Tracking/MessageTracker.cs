@@ -39,6 +39,12 @@ public sealed record MessageTrackerOptions
     /// <summary>確定後に訂正を受け付ける回数。</summary>
     public int MaxRevisions { get; init; } = 3;
 
+    /// <summary>
+    /// 初回観測からこの時間を過ぎた読みの変化は訂正として扱わない。
+    /// 表示直後の揺れは訂正だが、その後の変化はチャットが薄れることによる読みの悪化が多い（Phase 3 の実機確認）。
+    /// </summary>
+    public TimeSpan RevisionWindow { get; init; } = TimeSpan.FromSeconds(5);
+
     /// <summary>照合に使う直近の発言数。</summary>
     public int TrackingWindow { get; init; } = 60;
 }
@@ -233,6 +239,16 @@ public sealed class MessageTracker(TimeProvider time, MessageTrackerOptions? opt
 
         entry.LastCandidate = candidate;
         if (SameReading(entry.Message.Text, body))
+        {
+            entry.Alternative = null;
+            return;
+        }
+
+        // 訂正を受け付けるのは表示直後だけで、読みが悪くならない場合に限る。
+        // チャットが薄れていく間の読みの崩れ（例: コロンが •. になる）を訂正として採用しない
+        bool inWindow = time.GetElapsedTime(entry.FirstSeenAt, timestamp) <= _options.RevisionWindow;
+        bool noisier = ReadingQuality.NoiseScore(body) > ReadingQuality.NoiseScore(entry.Message.Text);
+        if (!inWindow || noisier)
         {
             entry.Alternative = null;
             return;
