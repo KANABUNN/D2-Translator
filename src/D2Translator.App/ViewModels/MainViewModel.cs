@@ -93,7 +93,9 @@ public sealed partial class MainViewModel : ObservableObject
             ? $"{recognizer.LanguageTag}{(recognizer.ClientLanguageTag is { } client ? $" + {client}（ゲーム表示）" : string.Empty)}、" +
               $"{recognizer.Scale}倍拡大、ROI 上限 {recognizer.MaxImageDimension}px"
             : $"{ocr.Availability.RequestedLanguage} 利用不可（インストール済み: {string.Join(", ", ocr.Availability.InstalledLanguages)}）";
-        GlossaryText = $"{glossary.Matcher.DictionaryVersion}（{glossary.EntryCount} 語義、未確認の用例を含む）";
+        GlossaryText = glossary.PendingCount == glossary.EntryCount
+            ? $"{glossary.Matcher.DictionaryVersion}（{glossary.EntryCount} 語義、全件が未確認）"
+            : $"{glossary.Matcher.DictionaryVersion}（{glossary.EntryCount} 語義、うち未確認 {glossary.PendingCount}）";
 
         var notices = new List<string>();
         if (settingsLoad.Status == SettingsLoadStatus.Invalid)

@@ -20,6 +20,6 @@
 
     <Product>D2 Chat Translator</Product>
     <!-- 版の唯一の定義。MSIX の版（4 桁）は scripts/package-msix.ps1 がここから作る -->
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
   </PropertyGroup>
 </Project>

@@ -23,11 +23,14 @@ public static class GlossaryLoader
     /// <summary>照合語で使える唯一の置換記号。任意の正規表現は受け付けない。</summary>
     public const string NumberPlaceholder = "{n}";
 
+    /// <summary>同梱の既定辞書（Bungie の公式名称、D2 用語、ネットスラング。全件が未確認、決定 D33）。</summary>
+    public const string DefaultResourceName = "glossary-default.json";
+
     private static readonly JsonSerializerOptions Options = CreateOptions();
 
-    public static GlossaryLoadResult LoadExample()
+    public static GlossaryLoadResult LoadDefault()
     {
-        using Stream stream = typeof(GlossaryLoader).Assembly.GetManifestResourceStream("glossary-example.json")
+        using Stream stream = typeof(GlossaryLoader).Assembly.GetManifestResourceStream(DefaultResourceName)
             ?? throw new InvalidOperationException("同梱の辞書が見つかりません。");
         return Load(stream);
     }

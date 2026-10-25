@@ -20,4 +20,9 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- 照合規則の試験用に固定した 11 語義の見本（仕様書 9.1 の用例）。同梱辞書とは別 -->
+  <ItemGroup>
+    <None Include="..\Fixtures\glossary-sample.json" Link="Fixtures\glossary-sample.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

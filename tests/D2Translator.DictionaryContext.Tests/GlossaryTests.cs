@@ -4,14 +4,18 @@ using D2Translator.Domain.Glossary;
 
 namespace D2Translator.DictionaryContext.Tests;
 
+/// <summary>照合と検証の規則の試験。固定した 11 語義の見本（仕様書 9.1 の用例）を使い、同梱辞書の内容に左右されない。</summary>
 public class GlossaryTests
 {
-    private static readonly GlossaryMatcher Matcher = GlossaryMatcher.FromDocument(GlossaryLoader.LoadExample().Document!);
+    private static readonly GlossaryMatcher Matcher = GlossaryMatcher.FromDocument(LoadSample().Document!);
+
+    internal static GlossaryLoadResult LoadSample() =>
+        GlossaryLoader.LoadFile(Path.Combine(AppContext.BaseDirectory, "Fixtures", "glossary-sample.json"));
 
     [Fact]
-    public void Example_dictionary_is_valid_and_unreviewed()
+    public void Sample_dictionary_is_valid_and_unreviewed()
     {
-        GlossaryLoadResult result = GlossaryLoader.LoadExample();
+        GlossaryLoadResult result = LoadSample();
 
         Assert.True(result.IsValid, string.Join(", ", result.Errors));
         Assert.Equal(11, result.Document!.Entries.Count);
@@ -73,7 +77,7 @@ public class GlossaryTests
     [Fact]
     public void One_bad_entry_rejects_the_whole_import()
     {
-        GlossaryDocument document = GlossaryLoader.LoadExample().Document!;
+        GlossaryDocument document = LoadSample().Document!;
         GlossaryEntry bad = document.Entries[0] with { SenseId = "other", Source = "a(b|c)*{x}" };
         GlossaryEntry duplicate = document.Entries[1];
 
@@ -85,7 +89,7 @@ public class GlossaryTests
     [Fact]
     public void Control_characters_are_rejected()
     {
-        GlossaryDocument document = GlossaryLoader.LoadExample().Document!;
+        GlossaryDocument document = LoadSample().Document!;
         GlossaryEntry bad = document.Entries[0] with { SenseId = "x", Target = "bad\u0007" };
 
         Assert.Single(GlossaryLoader.Validate(document with { Entries = [bad] }));
@@ -114,7 +118,7 @@ public class GlossaryTests
     [Fact]
     public void Too_many_entries_and_too_long_entries_are_rejected()
     {
-        GlossaryDocument document = GlossaryLoader.LoadExample().Document!;
+        GlossaryDocument document = LoadSample().Document!;
         GlossaryEntry entry = document.Entries[0];
         GlossaryEntry[] many = [.. Enumerable.Range(0, GlossaryLoader.MaxEntries + 1).Select(i => entry with { SenseId = $"s{i}" })];
         GlossaryEntry longEntry = entry with { SenseId = "long", Note = new string('x', GlossaryLoader.MaxEntryCharacters) };

@@ -76,7 +76,7 @@ internal static class SoakRun
         using WgcCaptureTarget target = window.Invoke(() => WgcCaptureTarget.CreateForWindow(window.Hwnd, time));
 
         var feed = new ChatFeed(new ChatLineParser(ChatFormat.JapaneseClient), new MessageTracker(time), new SpeakerRegistry(),
-            GlossaryMatcher.FromDocument(GlossaryLoader.LoadExample().Document!));
+            GlossaryMatcher.FromDocument(GlossaryLoader.LoadDefault().Document!));
         var options = new TranslationOptions(CloudEnabled: true, ContextEnabled: false, "Unknown", TimeSpan.FromSeconds(4),
             RequestsPerMinute: 60, SessionRequestCap: int.MaxValue, MaxOutputTokens: 1024);
         await using var coordinator = new TranslationCoordinator(feed, new SimulatedTranslator(), new SimulatedSecrets(), options,

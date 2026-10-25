@@ -1,0 +1,913 @@
+{
+  "dictionaryVersion": "d2-chat-2026-10-24-v1",
+  "multiSenseSurfaces": {
+    "ads": [
+      {
+        "termId": "d2.combat.adds",
+        "senseId": "enemies",
+        "source": "adds",
+        "target": "雑魚敵"
+      },
+      {
+        "termId": "d2.build.ads",
+        "senseId": "ads",
+        "source": "ADS",
+        "target": "照準を覗いて狙う"
+      }
+    ],
+    "dps": [
+      {
+        "termId": "d2.combat.dps",
+        "senseId": "damage",
+        "source": "DPS",
+        "target": "火力"
+      },
+      {
+        "termId": "d2.combat.dps",
+        "senseId": "damage-phase",
+        "source": "DPS",
+        "target": "攻撃フェーズ"
+      }
+    ],
+    "gtg": [
+      {
+        "termId": "chat.gtg",
+        "senseId": "gtg-leaving",
+        "source": "GTG",
+        "target": "もう行かないと／抜けます"
+      },
+      {
+        "termId": "chat.gtg",
+        "senseId": "gtg-ready",
+        "source": "GTG",
+        "target": "準備できた／いつでもいい"
+      }
+    ],
+    "g2g": [
+      {
+        "termId": "chat.gtg",
+        "senseId": "gtg-leaving",
+        "source": "GTG",
+        "target": "もう行かないと／抜けます"
+      },
+      {
+        "termId": "chat.gtg",
+        "senseId": "gtg-ready",
+        "source": "GTG",
+        "target": "準備できた／いつでもいい"
+      }
+    ],
+    "op": [
+      {
+        "termId": "chat.op-poster",
+        "senseId": "op-poster",
+        "source": "OP",
+        "target": "元の投稿者／スレ主"
+      },
+      {
+        "termId": "d2.pvp.op-overpowered",
+        "senseId": "op-overpowered",
+        "source": "OP",
+        "target": "強すぎる・性能が突出している"
+      }
+    ],
+    "ot": [
+      {
+        "termId": "chat.ot",
+        "senseId": "ot",
+        "source": "OT",
+        "target": "話題から外れるけど"
+      },
+      {
+        "termId": "chat.ot",
+        "senseId": "ot-overtime",
+        "source": "OT",
+        "target": "延長戦／延長時間"
+      }
+    ],
+    "tl;dr": [
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-summary",
+        "source": "TL;DR",
+        "target": "要約すると"
+      },
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-unread",
+        "source": "TL;DR",
+        "target": "長すぎて読んでいない"
+      }
+    ],
+    "tldr": [
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-summary",
+        "source": "TL;DR",
+        "target": "要約すると"
+      },
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-unread",
+        "source": "TL;DR",
+        "target": "長すぎて読んでいない"
+      }
+    ],
+    "tl dr": [
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-summary",
+        "source": "TL;DR",
+        "target": "要約すると"
+      },
+      {
+        "termId": "chat.tldr",
+        "senseId": "tldr-unread",
+        "source": "TL;DR",
+        "target": "長すぎて読んでいない"
+      }
+    ],
+    "gl": [
+      {
+        "termId": "chat.gl",
+        "senseId": "gl",
+        "source": "GL",
+        "target": "幸運を／頑張って"
+      },
+      {
+        "termId": "d2.weapon.gl",
+        "senseId": "gl",
+        "source": "GL",
+        "target": "グレネードランチャー"
+      }
+    ],
+    "nm": [
+      {
+        "termId": "chat.nm",
+        "senseId": "nm-notmuch",
+        "source": "NM",
+        "target": "特に何もないよ"
+      },
+      {
+        "termId": "chat.nm",
+        "senseId": "nm-nevermind",
+        "source": "NM",
+        "target": "やっぱりいい／今のは忘れて"
+      },
+      {
+        "termId": "d2.lfg.nm-normal",
+        "senseId": "nm-normal",
+        "source": "NM",
+        "target": "ノーマル難易度"
+      }
+    ],
+    "pm": [
+      {
+        "termId": "chat.pm",
+        "senseId": "pm",
+        "source": "PM",
+        "target": "個別メッセージ"
+      },
+      {
+        "termId": "chat.pm",
+        "senseId": "pm-afternoon",
+        "source": "PM",
+        "target": "午後"
+      }
+    ],
+    "fr": [
+      {
+        "termId": "chat.fr",
+        "senseId": "fr",
+        "source": "FR",
+        "target": "マジで／本当に"
+      },
+      {
+        "termId": "d2.weapon.fr",
+        "senseId": "fr",
+        "source": "FR",
+        "target": "フュージョンライフル"
+      }
+    ],
+    "i'm cooked": [
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-hopeless",
+        "source": "I'm cooked",
+        "target": "もう終わりだ／詰んだ"
+      },
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-exhausted",
+        "source": "I'm cooked",
+        "target": "もうへとへとだ"
+      }
+    ],
+    "im cooked": [
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-hopeless",
+        "source": "I'm cooked",
+        "target": "もう終わりだ／詰んだ"
+      },
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-exhausted",
+        "source": "I'm cooked",
+        "target": "もうへとへとだ"
+      }
+    ],
+    "we're cooked": [
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-hopeless",
+        "source": "I'm cooked",
+        "target": "もう終わりだ／詰んだ"
+      },
+      {
+        "termId": "chat.im-cooked",
+        "senseId": "im-cooked-exhausted",
+        "source": "I'm cooked",
+        "target": "もうへとへとだ"
+      }
+    ],
+    "tryhard": [
+      {
+        "termId": "chat.tryhard",
+        "senseId": "tryhard",
+        "source": "tryhard",
+        "target": "必死すぎる人／勝ちにこだわりすぎる"
+      },
+      {
+        "termId": "chat.tryhard",
+        "senseId": "tryhard-neutral",
+        "source": "tryhard",
+        "target": "本気で勝ちにいく／ガチで取り組む"
+      }
+    ],
+    "try-hard": [
+      {
+        "termId": "chat.tryhard",
+        "senseId": "tryhard",
+        "source": "tryhard",
+        "target": "必死すぎる人／勝ちにこだわりすぎる"
+      },
+      {
+        "termId": "chat.tryhard",
+        "senseId": "tryhard-neutral",
+        "source": "tryhard",
+        "target": "本気で勝ちにいく／ガチで取り組む"
+      }
+    ],
+    "no shit": [
+      {
+        "termId": "chat.no-shit",
+        "senseId": "no-shit-obvious",
+        "source": "no shit",
+        "target": "そりゃそうだ／当たり前だろ"
+      },
+      {
+        "termId": "chat.no-shit",
+        "senseId": "no-shit-surprise",
+        "source": "no shit",
+        "target": "マジで？／本当かよ"
+      }
+    ],
+    "discord": [
+      {
+        "termId": "chat.discord-service",
+        "senseId": "discord-service",
+        "source": "Discord",
+        "target": "Discord（通話・チャットサービス）"
+      },
+      {
+        "termId": "d2.official.perk-mod.f436e181aaee9b19",
+        "senseId": "localized-name",
+        "source": "Discord",
+        "target": "不和"
+      }
+    ],
+    "no worries": [
+      {
+        "termId": "chat.no-worries",
+        "senseId": "no-worries-apology",
+        "source": "no worries",
+        "target": "気にしないで／大丈夫だよ"
+      },
+      {
+        "termId": "chat.no-worries",
+        "senseId": "no-worries-thanks",
+        "source": "no worries",
+        "target": "どういたしまして"
+      },
+      {
+        "termId": "chat.no-worries",
+        "senseId": "no-worries-accept",
+        "source": "no worries",
+        "target": "任せて／大丈夫、できるよ"
+      }
+    ],
+    "all good": [
+      {
+        "termId": "chat.all-good",
+        "senseId": "all-good-statement",
+        "source": "all good",
+        "target": "大丈夫／問題ない"
+      },
+      {
+        "termId": "chat.all-good",
+        "senseId": "all-good-question",
+        "source": "all good",
+        "target": "大丈夫？／準備や状況に問題ない？"
+      }
+    ],
+    "gotcha": [
+      {
+        "termId": "chat.gotcha",
+        "senseId": "gotcha-understood",
+        "source": "gotcha",
+        "target": "了解／分かった"
+      },
+      {
+        "termId": "chat.gotcha",
+        "senseId": "gotcha-caught",
+        "source": "gotcha",
+        "target": "捕まえた／引っかかったな"
+      }
+    ],
+    "rip": [
+      {
+        "termId": "chat.rip",
+        "senseId": "rip-failure",
+        "source": "RIP",
+        "target": "ああ、終わった／残念"
+      },
+      {
+        "termId": "chat.rip",
+        "senseId": "rip-condolence",
+        "source": "RIP",
+        "target": "安らかに／ご冥福をお祈りします"
+      }
+    ],
+    "cos": [
+      {
+        "termId": "chat.cuz",
+        "senseId": "cuz",
+        "source": "cuz",
+        "target": "〜だから／〜のため"
+      },
+      {
+        "termId": "d2.activity.abbrev-cos",
+        "senseId": "activity-abbreviation",
+        "source": "Crown of Sorrow",
+        "target": "悲哀の冠"
+      }
+    ],
+    "yeet": [
+      {
+        "termId": "chat.yeet",
+        "senseId": "yeet-throw",
+        "source": "yeet",
+        "target": "勢いよく投げる／吹っ飛ばす"
+      },
+      {
+        "termId": "chat.yeet",
+        "senseId": "yeet-exclamation",
+        "source": "yeet",
+        "target": "イエーイ／そりゃっ"
+      }
+    ],
+    "lfg": [
+      {
+        "termId": "d2.lfg.lfg",
+        "senseId": "lfg",
+        "source": "LFG",
+        "target": "一緒に遊ぶグループを探しています"
+      },
+      {
+        "termId": "d2.lfg.lfg-celebration",
+        "senseId": "celebration",
+        "source": "LFG",
+        "target": "よっしゃ・行くぞ"
+      }
+    ],
+    "newbie friendly": [
+      {
+        "termId": "d2.lfg.newbie-friendly",
+        "senseId": "newbie-friendly",
+        "source": "newbie friendly",
+        "target": "初心者歓迎"
+      },
+      {
+        "termId": "d2.official.finder-label.82213d4ae52ed868",
+        "senseId": "localized-name",
+        "source": "Newbie Friendly",
+        "target": "新人大歓迎"
+      }
+    ],
+    "rr": [
+      {
+        "termId": "d2.lfg.rr-raidreport",
+        "senseId": "rr-raidreport",
+        "source": "raid report",
+        "target": "レイド戦績サイト・クリア記録"
+      },
+      {
+        "termId": "d2.lfg.rr-voiceroom",
+        "senseId": "rr-voiceroom",
+        "source": "raid room",
+        "target": "レイド用ボイスチャンネル"
+      }
+    ],
+    "stagger": [
+      {
+        "termId": "d2.combat.stagger",
+        "senseId": "stagger",
+        "source": "stagger",
+        "target": "ひるませる"
+      },
+      {
+        "termId": "d2.official.champion.219c43b9483d87eb",
+        "senseId": "localized-name",
+        "source": "Stagger",
+        "target": "怯み"
+      }
+    ],
+    "one shot": [
+      {
+        "termId": "d2.pvp.one-shot-health",
+        "senseId": "one-shot-health",
+        "source": "one shot",
+        "target": "あと一撃で倒せるほど削れている"
+      },
+      {
+        "termId": "d2.pvp.one-shot-kill",
+        "senseId": "one-hit-kill",
+        "source": "one shot",
+        "target": "1発で倒す・一撃で倒す"
+      }
+    ],
+    "one-shot": [
+      {
+        "termId": "d2.pvp.one-shot-health",
+        "senseId": "one-shot-health",
+        "source": "one shot",
+        "target": "あと一撃で倒せるほど削れている"
+      },
+      {
+        "termId": "d2.pvp.one-shot-kill",
+        "senseId": "one-hit-kill",
+        "source": "one shot",
+        "target": "1発で倒す・一撃で倒す"
+      }
+    ],
+    "synergy": [
+      {
+        "termId": "d2.build.synergy",
+        "senseId": "synergy",
+        "source": "synergy",
+        "target": "効果同士の相乗作用"
+      },
+      {
+        "termId": "d2.official.perk-mod.21ff92ac6d561a9d",
+        "senseId": "localized-name",
+        "source": "Synergy",
+        "target": "シナジー"
+      }
+    ],
+    "dr": [
+      {
+        "termId": "d2.build.dr",
+        "senseId": "dr",
+        "source": "DR",
+        "target": "被ダメージ軽減"
+      },
+      {
+        "termId": "d2.build.diminishing-returns",
+        "senseId": "diminishing-returns",
+        "source": "diminishing returns",
+        "target": "追加投資ほど伸びが小さくなること"
+      }
+    ],
+    "airborne effectiveness": [
+      {
+        "termId": "d2.build.ae",
+        "senseId": "ae",
+        "source": "AE",
+        "target": "空中効果（空中射撃の性能値）"
+      },
+      {
+        "termId": "d2.official.stat.143a6b85c10459a2",
+        "senseId": "localized-name",
+        "source": "Airborne Effectiveness",
+        "target": "空中効果"
+      }
+    ],
+    "enhanced trait": [
+      {
+        "termId": "d2.loot.enhanced-perk",
+        "senseId": "enhanced-perk",
+        "source": "enhanced perk",
+        "target": "強化版パーク"
+      },
+      {
+        "termId": "d2.official.equipment-type.841528b4a8c4eaf7",
+        "senseId": "localized-name",
+        "source": "Enhanced Trait",
+        "target": "強化特性"
+      }
+    ],
+    "enlightened": [
+      {
+        "termId": "d2.crota.enlightened-crota",
+        "senseId": "enlightened-crota",
+        "source": "enlightened",
+        "target": "聖杯の受け渡しで得るバフ"
+      },
+      {
+        "termId": "d2.gos.enlightened",
+        "senseId": "enlightened-garden",
+        "source": "enlightened",
+        "target": "白い無敵シールドを解除するためのバフ"
+      }
+    ],
+    "commander zavala": [
+      {
+        "termId": "d2.npc.zavala",
+        "senseId": "entity",
+        "source": "Zavala",
+        "target": "ザヴァラ"
+      },
+      {
+        "termId": "d2.official.npc.62b1cc93c2944cb4",
+        "senseId": "localized-name",
+        "source": "Commander Zavala",
+        "target": "ザヴァラ司令官"
+      }
+    ],
+    "ikora rey": [
+      {
+        "termId": "d2.npc.ikora",
+        "senseId": "entity",
+        "source": "Ikora",
+        "target": "イコラ"
+      },
+      {
+        "termId": "d2.official.npc.965d73ecd6783c84",
+        "senseId": "localized-name",
+        "source": "Ikora Rey",
+        "target": "イコラ・レイ"
+      }
+    ],
+    "lord shaxx": [
+      {
+        "termId": "d2.npc.shaxx",
+        "senseId": "entity",
+        "source": "Shaxx",
+        "target": "シャックス"
+      },
+      {
+        "termId": "d2.official.npc.e6326b2f39563f8a",
+        "senseId": "localized-name",
+        "source": "Lord Shaxx",
+        "target": "シャックス卿"
+      }
+    ],
+    "master rahool": [
+      {
+        "termId": "d2.npc.rahool",
+        "senseId": "entity",
+        "source": "Rahool",
+        "target": "ラフール"
+      },
+      {
+        "termId": "d2.official.npc.11cce3a53b1c6c4a",
+        "senseId": "localized-name",
+        "source": "Master Rahool",
+        "target": "マスター・ラフール"
+      }
+    ],
+    "rift": [
+      {
+        "termId": "d2.build.rift-ability",
+        "senseId": "rift-ability",
+        "source": "rift",
+        "target": "リフト（ウォーロックの設置スキル）"
+      },
+      {
+        "termId": "d2.official.activity.2fedddfee8ae4017",
+        "senseId": "localized-name",
+        "source": "Rift",
+        "target": "暁光"
+      }
+    ],
+    "fragment": [
+      {
+        "termId": "d2.build.fragment-subclass",
+        "senseId": "fragment-subclass",
+        "source": "fragment",
+        "target": "かけら（サブクラスの構成要素）"
+      },
+      {
+        "termId": "d2.official.activity.3a12dfd7c176f0db",
+        "senseId": "localized-name",
+        "source": "Fragment",
+        "target": "破片"
+      }
+    ],
+    "mercy": [
+      {
+        "termId": "d2.pvp.mercy-rule",
+        "senseId": "mercy-rule",
+        "source": "mercy",
+        "target": "コールド勝ち・一方的な得点差での早期終了"
+      },
+      {
+        "termId": "d2.official.sandbox-perk.83d16de0ed35dffd",
+        "senseId": "localized-name",
+        "source": "Mercy",
+        "target": "慈悲"
+      }
+    ],
+    "survival": [
+      {
+        "termId": "d2.combat.survival",
+        "senseId": "survival",
+        "source": "survival",
+        "target": "生存・生き残ること"
+      },
+      {
+        "termId": "d2.official.activity.c3bbab9717a958c4",
+        "senseId": "localized-name",
+        "source": "Survival",
+        "target": "ライフリミット"
+      }
+    ],
+    "elimination": [
+      {
+        "termId": "d2.combat.elimination",
+        "senseId": "elimination",
+        "source": "elimination",
+        "target": "敵の排除・撃破"
+      },
+      {
+        "termId": "d2.official.activity.08982c51f82b72dc",
+        "senseId": "localized-name",
+        "source": "Elimination",
+        "target": "サバイバル"
+      }
+    ],
+    "deathless run": [
+      {
+        "termId": "d2.lfg.deathless-run",
+        "senseId": "deathless-run",
+        "source": "deathless run",
+        "target": "死亡せずに進める回"
+      },
+      {
+        "termId": "d2.official.finder-label.b1e44b76428f7e9c",
+        "senseId": "localized-name",
+        "source": "Deathless Run",
+        "target": "死なずに完了"
+      }
+    ],
+    "sr": [
+      {
+        "termId": "d2.weapon.sr-sniper",
+        "senseId": "sr-sniper",
+        "source": "SR",
+        "target": "スナイパーライフル"
+      },
+      {
+        "termId": "d2.weapon.sr-scout",
+        "senseId": "sr-scout",
+        "source": "SR",
+        "target": "スカウトライフル"
+      }
+    ],
+    "ea": [
+      {
+        "termId": "d2.perk.ea-assassin",
+        "senseId": "ea-assassin",
+        "source": "EA",
+        "target": "妬む刺客"
+      },
+      {
+        "termId": "d2.perk.ea-arsenal",
+        "senseId": "ea-arsenal",
+        "source": "EA",
+        "target": "妬ましい兵器"
+      }
+    ],
+    "ff": [
+      {
+        "termId": "d2.perk.ff-focused",
+        "senseId": "ff-focused",
+        "source": "FF",
+        "target": "集束した憤怒"
+      },
+      {
+        "termId": "d2.perk.ff-feeding",
+        "senseId": "ff-feeding",
+        "source": "FF",
+        "target": "狂乱索餌"
+      }
+    ],
+    "unbreakable": [
+      {
+        "termId": "d2.official.ability.253acf7f8f63c93b",
+        "senseId": "localized-name",
+        "source": "Unbreakable",
+        "target": "難攻不落"
+      },
+      {
+        "termId": "d2.official.activity.50bb32baa643c6ff",
+        "senseId": "localized-name",
+        "source": "Unbreakable",
+        "target": "破壊不可"
+      }
+    ],
+    "competitive": [
+      {
+        "termId": "d2.official.activity.9182a76bbfe91eec",
+        "senseId": "localized-name",
+        "source": "Competitive",
+        "target": "対戦モード"
+      },
+      {
+        "termId": "d2.official.finder-label.1efd841e16b4e125",
+        "senseId": "localized-name",
+        "source": "Competitive",
+        "target": "負けず嫌い"
+      }
+    ],
+    "european dead zone": [
+      {
+        "termId": "d2.official.activity.c5a7413a951d443a",
+        "senseId": "localized-name",
+        "source": "European Dead Zone",
+        "target": "EDZ"
+      },
+      {
+        "termId": "d2.official.activity.98d86181bd397c9f",
+        "senseId": "localized-name",
+        "source": "European Dead Zone",
+        "target": "ヨーロッパ・デッドゾーン"
+      }
+    ],
+    "iron banner clash": [
+      {
+        "termId": "d2.official.activity.06076fcbb1515453",
+        "senseId": "localized-name",
+        "source": "Iron Banner Clash",
+        "target": "アイアンバナー クラッシュ"
+      },
+      {
+        "termId": "d2.official.activity-mode.74456d0b251bc614",
+        "senseId": "localized-name",
+        "source": "Iron Banner Clash",
+        "target": "アイアンバナー「クラッシュ」"
+      }
+    ],
+    "iron banner control": [
+      {
+        "termId": "d2.official.activity.edb28400c6c068de",
+        "senseId": "localized-name",
+        "source": "Iron Banner Control",
+        "target": "アイアンバナー コントロール"
+      },
+      {
+        "termId": "d2.official.activity-mode.c9236026716ba056",
+        "senseId": "localized-name",
+        "source": "Iron Banner Control",
+        "target": "アイアンバナー「コントロール」"
+      }
+    ],
+    "iron banner supremacy": [
+      {
+        "termId": "d2.official.activity.443b60b624a2ff62",
+        "senseId": "localized-name",
+        "source": "Iron Banner Supremacy",
+        "target": "アイアンバナー・闘魂"
+      },
+      {
+        "termId": "d2.official.activity-mode.f79d38e3981f9bf2",
+        "senseId": "localized-name",
+        "source": "Iron Banner Supremacy",
+        "target": "アイアンバナー「闘魂」"
+      }
+    ],
+    "riptide": [
+      {
+        "termId": "d2.official.activity.80065108d20e3ae9",
+        "senseId": "localized-name",
+        "source": "Riptide",
+        "target": "激流"
+      },
+      {
+        "termId": "d2.official.weapon.83f8e60a702790ac",
+        "senseId": "localized-name",
+        "source": "Riptide",
+        "target": "リップタイド"
+      }
+    ],
+    "titan": [
+      {
+        "termId": "d2.official.activity.7c23aaf96141f820",
+        "senseId": "localized-name",
+        "source": "Titan",
+        "target": "衛星タイタン"
+      },
+      {
+        "termId": "d2.official.destination.51d0818c1725d633",
+        "senseId": "localized-name",
+        "source": "Titan",
+        "target": "タイタン"
+      }
+    ],
+    "enhanced battery": [
+      {
+        "termId": "d2.official.equipment-type.091cc0df9e8a4932",
+        "senseId": "localized-name",
+        "source": "Enhanced Battery",
+        "target": "強化版バッテリー"
+      },
+      {
+        "termId": "d2.official.perk-mod.2bfe074df8dcc944",
+        "senseId": "localized-name",
+        "source": "Enhanced Battery",
+        "target": "強化バッテリー"
+      }
+    ],
+    "enhanced origin trait": [
+      {
+        "termId": "d2.official.equipment-type.45c6143732a6b2e4",
+        "senseId": "localized-name",
+        "source": "Enhanced Origin Trait",
+        "target": "強化版起源特性"
+      },
+      {
+        "termId": "d2.official.equipment-type.68d21d4eb04bd342",
+        "senseId": "localized-name",
+        "source": "Enhanced Origin Trait",
+        "target": "強化起源特性"
+      }
+    ],
+    "melee": [
+      {
+        "termId": "d2.official.equipment-type.b0406974a1da32e7",
+        "senseId": "localized-name",
+        "source": "Melee",
+        "target": "近接攻撃"
+      },
+      {
+        "termId": "d2.official.stat.f59c66af1a3b5b90",
+        "senseId": "localized-name",
+        "source": "Melee",
+        "target": "近接"
+      }
+    ],
+    "hatchling refit": [
+      {
+        "termId": "d2.official.perk-mod.c2fd84f23a7e6353",
+        "senseId": "localized-name",
+        "source": "Hatchling Refit",
+        "target": "「雛」再装備"
+      },
+      {
+        "termId": "d2.official.perk-mod.32eeec3347f725d7",
+        "senseId": "localized-name",
+        "source": "Hatchling Refit",
+        "target": "雛の再装備"
+      }
+    ],
+    "super mod": [
+      {
+        "termId": "d2.official.perk-mod.8dcd95081eb59bfd",
+        "senseId": "localized-name",
+        "source": "Super Mod",
+        "target": "スーパースキルMOD"
+      },
+      {
+        "termId": "d2.official.perk-mod.eedfd9a0e48f8e31",
+        "senseId": "localized-name",
+        "source": "Super Mod",
+        "target": "スーパースキル改造パーツ"
+      }
+    ],
+    "persistence": [
+      {
+        "termId": "d2.official.sandbox-perk.97b57c7fa63f65c9",
+        "senseId": "localized-name",
+        "source": "Persistence",
+        "target": "執念"
+      },
+      {
+        "termId": "d2.official.stat.88d1aef45e67fe43",
+        "senseId": "localized-name",
+        "source": "Persistence",
+        "target": "持続性"
+      }
+    ]
+  }
+}

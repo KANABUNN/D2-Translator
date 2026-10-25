@@ -94,7 +94,7 @@ internal static class TestPipelines
         new ChatLineParser(ChatFormat.JapaneseClient),
         new MessageTracker(TimeProvider.System),
         new SpeakerRegistry(),
-        GlossaryMatcher.FromDocument(GlossaryLoader.LoadExample().Document!));
+        GlossaryMatcher.FromDocument(GlossaryLoader.LoadFile(Path.Combine(AppContext.BaseDirectory, "Fixtures", "glossary-sample.json")).Document!));
 
     public static ReceivePipeline NewPipeline(IOcrRecognizer ocr, ChatFeed? feed = null) =>
         new(ocr, feed ?? NewFeed(), TimeProvider.System, NullLogger<ReceivePipeline>.Instance);

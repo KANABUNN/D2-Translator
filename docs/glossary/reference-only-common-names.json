@@ -1,0 +1,201 @@
+{
+  "dictionaryVersion": "d2-chat-2026-10-24-v1",
+  "purpose": "Reference only. Not a loadable schema-v1 glossary. Bare common words were omitted to reduce false-positive hints; future contextual matching could reuse these names.",
+  "entries": [
+    {
+      "source": "???",
+      "target": "???",
+      "category": "activity"
+    },
+    {
+      "source": "All",
+      "target": "全て",
+      "category": "activity-mode"
+    },
+    {
+      "source": "Beyond",
+      "target": "彼方",
+      "category": "activity"
+    },
+    {
+      "source": "Campaign",
+      "target": "ストーリーミッション",
+      "category": "activity"
+    },
+    {
+      "source": "Chosen",
+      "target": "選ばれし者",
+      "category": "activity"
+    },
+    {
+      "source": "Classified",
+      "target": "機密",
+      "category": "activity"
+    },
+    {
+      "source": "Classified",
+      "target": "機密",
+      "category": "activity-type"
+    },
+    {
+      "source": "Creation",
+      "target": "生産拠点",
+      "category": "activity"
+    },
+    {
+      "source": "Edge",
+      "target": "エッジ",
+      "category": "perk-mod"
+    },
+    {
+      "source": "Edge",
+      "target": "エッジ",
+      "category": "sandbox-perk"
+    },
+    {
+      "source": "Expert",
+      "target": "名人",
+      "category": "finder-label"
+    },
+    {
+      "source": "Farewell",
+      "target": "決別",
+      "category": "weapon"
+    },
+    {
+      "source": "Fast",
+      "target": "お急ぎ",
+      "category": "finder-label"
+    },
+    {
+      "source": "Flawless",
+      "target": "不敗",
+      "category": "finder-label"
+    },
+    {
+      "source": "Hope",
+      "target": "希望",
+      "category": "activity"
+    },
+    {
+      "source": "Legendary",
+      "target": "伝説",
+      "category": "activity"
+    },
+    {
+      "source": "Legendary",
+      "target": "伝説",
+      "category": "material"
+    },
+    {
+      "source": "Loss",
+      "target": "喪失",
+      "category": "perk-mod"
+    },
+    {
+      "source": "Loss",
+      "target": "喪失",
+      "category": "sandbox-perk"
+    },
+    {
+      "source": "Master",
+      "target": "達人",
+      "category": "finder-label"
+    },
+    {
+      "source": "Mission",
+      "target": "ミッション",
+      "category": "activity-type"
+    },
+    {
+      "source": "Normal",
+      "target": "普通",
+      "category": "material"
+    },
+    {
+      "source": "Purpose",
+      "target": "パーパス",
+      "category": "weapon"
+    },
+    {
+      "source": "Release",
+      "target": "解放",
+      "category": "activity"
+    },
+    {
+      "source": "Six",
+      "target": "「6」",
+      "category": "activity"
+    },
+    {
+      "source": "Social",
+      "target": "ソーシャル",
+      "category": "activity-mode"
+    },
+    {
+      "source": "Social",
+      "target": "ソーシャル",
+      "category": "activity-type"
+    },
+    {
+      "source": "Someday",
+      "target": "まだ見ぬ未来",
+      "category": "weapon"
+    },
+    {
+      "source": "Stacked",
+      "target": "積層",
+      "category": "perk-mod"
+    },
+    {
+      "source": "Stacked",
+      "target": "積層",
+      "category": "sandbox-perk"
+    },
+    {
+      "source": "Story",
+      "target": "ストーリー",
+      "category": "activity-mode"
+    },
+    {
+      "source": "Story",
+      "target": "ストーリー",
+      "category": "activity-type"
+    },
+    {
+      "source": "Tear",
+      "target": "裂け目",
+      "category": "perk-mod"
+    },
+    {
+      "source": "Tear",
+      "target": "裂け目",
+      "category": "sandbox-perk"
+    },
+    {
+      "source": "The Title",
+      "target": "タイトル",
+      "category": "weapon"
+    },
+    {
+      "source": "Trust",
+      "target": "トラスト",
+      "category": "weapon"
+    },
+    {
+      "source": "Truth",
+      "target": "トゥルース",
+      "category": "weapon"
+    },
+    {
+      "source": "Weapons",
+      "target": "武器",
+      "category": "stat"
+    },
+    {
+      "source": "Worthy",
+      "target": "名士",
+      "category": "activity"
+    }
+  ]
+}

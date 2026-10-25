@@ -1,0 +1,502 @@
+{
+  "testedAt": "2026-10-24",
+  "runtime": ".NET 10.0.8",
+  "harness": "copied unchanged product GlossaryLoader / GlossaryMatcher / GlossaryEntry / AnnotationSet; original annotation type definitions",
+  "entryCount": 9547,
+  "userEntryCount": 9536,
+  "uniqueSurfaces": 10988,
+  "fileBytes": 4035116,
+  "loadMs": 142.2614,
+  "constructionMs": 119.8345,
+  "warmMatch": {
+    "calls": 240,
+    "p50Ms": 1.9629,
+    "p95Ms": 2.8416,
+    "maxMs": 6.2345,
+    "corpus": [
+      "LF2M DSC KWTD fresh run no mic",
+      "brb 2 min sry my bad lol",
+      "use Divinity and Gjallarhorn for DPS",
+      "Izanagi's Burden with Bait and Switch",
+      "Well of Radiance and Thundercrash ready",
+      "ggs everyone thanks for the run",
+      "idk tbh can someone explain the strat",
+      "GL OP FR NM Discord rift fragment G2G",
+      "no mic required he is one of our sherpas recoil direction",
+      "abcdefghijklmnop qrstuvwxyz 0123456789",
+      "please wait for me before starting the next encounter",
+      "DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe"
+    ]
+  },
+  "checksPassed": 62,
+  "checks": [
+    "actual-product-loader-full: ",
+    "actual-product-loader-user: ",
+    "entry-count-limit",
+    "full-file-size-limit",
+    "human-review-status-pending",
+    "directions-en-ja",
+    "unique-term-sense-keys",
+    "preserved-original-eleven-senses",
+    "user-file-is-additions-only",
+    "no-original-sample-ids-in-additions",
+    "runtime-user-merge-keys-valid",
+    "match: LF3M raid KWTD => あと3人募集",
+    "match: LF12M => あと12人募集",
+    "match: dps now => 火力 / 攻撃フェーズ",
+    "match: please rez me => 蘇生",
+    "match: Divinity => 神性",
+    "match: Gjallarhorn => ギャラルホルン",
+    "match: Izanagi's Burden => イザナギの覚悟",
+    "match: Well of Radiance => 輝く泉",
+    "match: gg => おつかれ",
+    "match: brb 2 min => 少し離席",
+    "match: idk tbh => 分からない",
+    "match: sry my bad => ごめん",
+    "match: GL => グレネードランチャー",
+    "match: GL => 幸運",
+    "match: FR => フュージョンライフル",
+    "match: FR => 本当",
+    "match: OP => 強",
+    "match: OP => 投稿者",
+    "match: NM => ノーマル",
+    "match: G2G => 準備",
+    "match: G2G => 行か",
+    "match: Discord => 通話",
+    "match: Discord => 不和",
+    "match: DSC => ディープストーン",
+    "match: VoG => ガラスの間",
+    "match: CP => チェックポイント",
+    "match: ADS => 照準",
+    "match: ADS => 雑魚敵",
+    "match: rift => リフト",
+    "match: rift => 暁光",
+    "match: fragment => かけら",
+    "match: fragment => 破片",
+    "match: PM => 午後",
+    "match: OT => 延長戦",
+    "match: tryhard => 本気で",
+    "match: no mic required => 不要",
+    "negative-mic-requirement-not-inverted",
+    "ordinary-one-of-not-low-health",
+    "match: recoil direction => 反動方向",
+    "ads-not-inside-address",
+    "div-not-inside-individual",
+    "gg-not-inside-eggs",
+    "plain-well-not-added",
+    "three-digit-placeholder-rejected",
+    "match: wElL   oF\tRaDiAnCe => 輝く泉",
+    "full-vs-user-merged-equivalence",
+    "reject-invalid-json-or-schema",
+    "reject-invalid-json-or-schema",
+    "reject-invalid-json-or-schema",
+    "reject-duplicate-key",
+    "reject-unsupported-placeholder"
+  ],
+  "examples": [
+    {
+      "text": "LF2M DSC KWTD fresh run no mic",
+      "matches": [
+        {
+          "Text": "LF2M",
+          "Note": "あと2人募集。数字を保持し、募集人数として解釈する（未確認の辞書）",
+          "ReferenceId": "d2.lfg.lfnm"
+        },
+        {
+          "Text": "DSC",
+          "Note": "ディープストーン・クリプト。活動名と募集で使う略称。日本語は現行Manifestの同一ハッシュを照合し、難易度の接尾辞は除外。データの存在は現在の提供・周回可能性を示さない。略称は別分野・他作品と重複し得る。（未確認の辞書）",
+          "ReferenceId": "d2.activity.abbrev-dsc"
+        },
+        {
+          "Text": "KWTD",
+          "Note": "手順を理解していること。募集文の参加条件。初心者歓迎とは訳さない（未確認の辞書）",
+          "ReferenceId": "d2.lfg.kwtd"
+        },
+        {
+          "Text": "fresh run",
+          "Note": "最初から開始する回。通常は途中チェックポイント開始と対比する。初見プレイヤー限定とは限らない。（未確認の辞書）",
+          "ReferenceId": "d2.lfg.fresh-run"
+        },
+        {
+          "Text": "no mic",
+          "Note": "マイクなし。音声入力がないこと。聞き取りやテキスト会話が可能かは別。（未確認の辞書）",
+          "ReferenceId": "d2.lfg.no-mic"
+        }
+      ]
+    },
+    {
+      "text": "brb 2 min sry my bad lol",
+      "matches": [
+        {
+          "Text": "brb",
+          "Note": "少し離席。発話の意図と口調を保持する（未確認の辞書）",
+          "ReferenceId": "d2.chat.brb"
+        },
+        {
+          "Text": "sry",
+          "Note": "ごめん／すみません。謝罪の略記。軽い口調で、真剣さは前後から判断する。（未確認の辞書）",
+          "ReferenceId": "chat.sry"
+        },
+        {
+          "Text": "my bad",
+          "Note": "ごめん、自分のミス。自分の非を認める略語。容量単位などと区別する。（未確認の辞書）",
+          "ReferenceId": "chat.mb"
+        },
+        {
+          "Text": "lol",
+          "Note": "笑／ウケる。笑い、照れ隠し、皮肉もある。必ず爆笑とは訳さない。（未確認の辞書）",
+          "ReferenceId": "chat.lol"
+        }
+      ]
+    },
+    {
+      "text": "use Divinity and Gjallarhorn for DPS",
+      "matches": [
+        {
+          "Text": "Divinity",
+          "Note": "神性。公式日英データの同一IDに基づく武器名。一般語義との区別は文脈で判断。（未確認の辞書）",
+          "ReferenceId": "d2.official.weapon.3f2c37e4f6d6ee35"
+        },
+        {
+          "Text": "Gjallarhorn",
+          "Note": "ギャラルホルン。公式日英データの同一IDに基づく武器名。一般語義との区別は文脈で判断。（未確認の辞書）",
+          "ReferenceId": "d2.official.weapon.f6b512515f172548"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        }
+      ]
+    },
+    {
+      "text": "Izanagi's Burden with Bait and Switch",
+      "matches": [
+        {
+          "Text": "Izanagi's Burden",
+          "Note": "イザナギの覚悟。公式日英データの同一IDに基づく武器名。（未確認の辞書）",
+          "ReferenceId": "d2.official.weapon.1c30b22a8f44ee73"
+        },
+        {
+          "Text": "Bait and Switch",
+          "Note": "囮攻撃。公式日英データの同一IDに基づくパーク・MOD名・パーク名。現在の提供・入手可否や効果を示すものではない。（未確認の辞書）",
+          "ReferenceId": "d2.official.perk-mod.51c46aa02f298db1"
+        }
+      ]
+    },
+    {
+      "text": "Well of Radiance and Thundercrash ready",
+      "matches": [
+        {
+          "Text": "Well of Radiance",
+          "Note": "輝く泉。単独の well は一般語の可能性が高いため、正式名のみを照合する（未確認の辞書）",
+          "ReferenceId": "d2.subclass.well"
+        },
+        {
+          "Text": "Thundercrash",
+          "Note": "サンダークラッシュ。公式日英データの同一IDに基づく能力名・パーク名。一般語義との区別は文脈で判断。（未確認の辞書）",
+          "ReferenceId": "d2.official.ability.3581501aaf72c0a1"
+        }
+      ]
+    },
+    {
+      "text": "ggs everyone thanks for the run",
+      "matches": [
+        {
+          "Text": "ggs",
+          "Note": "対戦ありがとう／お疲れさま。複数試合後などの挨拶。口調によっては皮肉。（未確認の辞書）",
+          "ReferenceId": "chat.ggs"
+        }
+      ]
+    },
+    {
+      "text": "idk tbh can someone explain the strat",
+      "matches": [
+        {
+          "Text": "idk",
+          "Note": "分からない。知らないという返答。否定や拒否と混同しない。（未確認の辞書）",
+          "ReferenceId": "chat.idk"
+        },
+        {
+          "Text": "tbh",
+          "Note": "正直に言うと。率直な意見を述べる前置き。（未確認の辞書）",
+          "ReferenceId": "chat.tbh"
+        }
+      ]
+    },
+    {
+      "text": "GL OP FR NM Discord rift fragment G2G",
+      "matches": [
+        {
+          "Text": "GL",
+          "Note": "幸運を／頑張って / グレネードランチャー（語義が複数）。励ましの略語。D2ではグレネードランチャーの略とも衝突する。（未確認の辞書）",
+          "ReferenceId": "chat.gl"
+        },
+        {
+          "Text": "OP",
+          "Note": "元の投稿者／スレ主 / 強すぎる・性能が突出している（語義が複数）。投稿者を指す用法。強すぎるの意味と区別する。（未確認の辞書）",
+          "ReferenceId": "chat.op-poster"
+        },
+        {
+          "Text": "FR",
+          "Note": "マジで／本当に / フュージョンライフル（語義が複数）。真剣さや同意を示す略語。D2ではフュージョンライフルとも衝突する。（未確認の辞書）",
+          "ReferenceId": "chat.fr"
+        },
+        {
+          "Text": "NM",
+          "Note": "特に何もないよ / やっぱりいい／今のは忘れて / ノーマル難易度（語義が複数）。近況への返答。取り消しの別義もある。（未確認の辞書）",
+          "ReferenceId": "chat.nm"
+        },
+        {
+          "Text": "Discord",
+          "Note": "Discord（通話・チャットサービス） / 不和（語義が複数）。通話やチャットサービスの固有名詞。D2の武器パーク名「不和」と別義。（未確認の辞書）",
+          "ReferenceId": "chat.discord-service"
+        },
+        {
+          "Text": "rift",
+          "Note": "リフト（ウォーロックの設置スキル） / 暁光（語義が複数）。ゲームモードの暁光 Rift と同綴り。スキル文脈の語義。（未確認の辞書）",
+          "ReferenceId": "d2.build.rift-ability"
+        },
+        {
+          "Text": "fragment",
+          "Note": "かけら（サブクラスの構成要素） / 破片（語義が複数）。対戦マップ「破片」Fragment や素材の破片とは別義。（未確認の辞書）",
+          "ReferenceId": "d2.build.fragment-subclass"
+        },
+        {
+          "Text": "G2G",
+          "Note": "もう行かないと／抜けます / 準備できた／いつでもいい（語義が複数）。退出の用法。同じ表記に準備完了の別義がある。（未確認の辞書）",
+          "ReferenceId": "chat.gtg"
+        }
+      ]
+    },
+    {
+      "text": "no mic required he is one of our sherpas recoil direction",
+      "matches": [
+        {
+          "Text": "no mic required",
+          "Note": "マイク不要。募集条件の否定表現。mic required（マイク必須）と反対の意味のため長い表現を優先する。聞き取りが必要かは別。（未確認の辞書）",
+          "ReferenceId": "d2.lfg.no-mic-required"
+        },
+        {
+          "Text": "recoil direction",
+          "Note": "反動方向。公式日英データの同一IDに基づくステータス名。（未確認の辞書）",
+          "ReferenceId": "d2.official.stat.9c02105b3bd5630e"
+        }
+      ]
+    },
+    {
+      "text": "abcdefghijklmnop qrstuvwxyz 0123456789",
+      "matches": []
+    },
+    {
+      "text": "please wait for me before starting the next encounter",
+      "matches": []
+    },
+    {
+      "text": "DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe DPS rez adds wipe",
+      "matches": [
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        },
+        {
+          "Text": "DPS",
+          "Note": "火力 / 攻撃フェーズ（語義が複数）。数値の話とフェーズ開始の指示を分ける（未確認の辞書）",
+          "ReferenceId": "d2.combat.dps"
+        },
+        {
+          "Text": "rez",
+          "Note": "蘇生。依頼、可能回数、否定の有無を保持する（未確認の辞書）",
+          "ReferenceId": "d2.combat.rez"
+        },
+        {
+          "Text": "adds",
+          "Note": "雑魚敵。広告の意味もあり、ゲーム文脈で確認する（未確認の辞書）",
+          "ReferenceId": "d2.combat.adds"
+        },
+        {
+          "Text": "wipe",
+          "Note": "全滅してやり直す。汚れを拭く等の一般語義と区別する（未確認の辞書）",
+          "ReferenceId": "d2.combat.wipe"
+        }
+      ]
+    }
+  ],
+  "limits": "Standalone local console measurements; not game/OCR/UI/API integration or human bilingual acceptance."
+}

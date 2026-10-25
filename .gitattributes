@@ -11,6 +11,10 @@
 *.json   text
 *.ps1    text eol=crlf
 
+# 既定辞書と出典は、パッケージの SHA-256（docs/glossary/SHA256SUMS.txt）と照合できるよう改行を変換しない
+src/D2Translator.DictionaryContext/Data/glossary-default.json -text
+docs/glossary/** -text
+
 *.png    binary
 *.jpg    binary
 *.ico    binary

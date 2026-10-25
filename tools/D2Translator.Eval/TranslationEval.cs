@@ -46,7 +46,7 @@ internal static class TranslationEval
 
         using HttpClient http = OpenAIResponsesProvider.CreateHttpClient();
         var provider = new OpenAIResponsesProvider(http, secrets, TimeProvider.System, NullLogger<OpenAIResponsesProvider>.Instance);
-        GlossaryMatcher glossary = GlossaryMatcher.FromDocument(GlossaryLoader.LoadExample().Document!);
+        GlossaryMatcher glossary = GlossaryMatcher.FromDocument(GlossaryLoader.LoadDefault().Document!);
         var usage = new UsageMeter();
 
         var output = new StringBuilder();

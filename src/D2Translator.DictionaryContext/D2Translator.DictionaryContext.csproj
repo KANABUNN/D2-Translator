@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\glossary-example.json" LogicalName="glossary-example.json" />
+    <!-- 出典と検証結果は docs/glossary に別に置き、辞書には埋め込まない -->
+    <EmbeddedResource Include="Data\glossary-default.json" LogicalName="glossary-default.json" />
   </ItemGroup>
 
   <ItemGroup>

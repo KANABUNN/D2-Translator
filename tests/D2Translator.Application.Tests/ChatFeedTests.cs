@@ -1,8 +1,12 @@
 using System.Diagnostics;
 using D2Translator.Application.Chat;
+using D2Translator.DictionaryContext;
 using D2Translator.Domain.Chat;
 using D2Translator.Domain.Geometry;
+using D2Translator.Domain.Glossary;
 using D2Translator.Domain.Ocr;
+using D2Translator.TextTracking.Parsing;
+using D2Translator.TextTracking.Speakers;
 using D2Translator.TextTracking.Tracking;
 
 namespace D2Translator.Application.Tests;
@@ -45,6 +49,31 @@ public class ChatFeedTests
         Assert.Equal((MessageStatus.GlossaryOnly, "P1"), (confirmed.Status, confirmed.SpeakerKey));
         TextAnnotation mention = Assert.Single(confirmed.Annotations);
         Assert.Equal((AnnotationKind.SpeakerMention, "grey warden", "P2"), (mention.Kind, mention.Text, mention.ReferenceId));
+    }
+
+    [Fact]
+    public void Speaker_name_that_is_also_a_glossary_term_is_kept_only_as_a_mention()
+    {
+        // 既定辞書は Bungie の固有名を含むため、プレイヤー名と用語が同じことがある（例: Riven）。
+        // 名前を辞書のヒントとして外部へ送らないよう、話者名の注釈だけを残す（決定 D14、D33）
+        var riven = new GlossaryEntry
+        {
+            TermId = "d2.npc.riven",
+            SenseId = "boss",
+            Source = "Riven",
+            Target = "リベン",
+            Provenance = new GlossaryProvenance { Kind = "test" },
+        };
+        var feed = new ChatFeed(new ChatLineParser(ChatFormat.JapaneseClient), new MessageTracker(TimeProvider.System),
+            new SpeakerRegistry(), new GlossaryMatcher([riven], "test"));
+        var updates = new List<ChatFeedUpdate>();
+        feed.Updated += (_, u) => updates.Add(u);
+
+        feed.OnObservation(Observation("[Riven#4242]: hi all"), Ms(0));
+        feed.OnObservation(Observation("[Riven#4242]: hi all", "[Kestrel#5678]: Riven is down"), Ms(1000));
+
+        TextAnnotation annotation = Assert.Single(updates[^1].Message.Annotations);
+        Assert.Equal((AnnotationKind.SpeakerMention, "Riven"), (annotation.Kind, annotation.Text));
     }
 
     [Fact]

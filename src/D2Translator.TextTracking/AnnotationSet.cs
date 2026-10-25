@@ -4,7 +4,10 @@ namespace D2Translator.TextTracking;
 
 public static class AnnotationSet
 {
-    /// <summary>最長一致を優先し、重ならない注釈だけを位置順に残す（仕様書 9.1）。同じ範囲の注釈は併記する。</summary>
+    /// <summary>
+    /// 最長一致を優先し、重ならない注釈だけを位置順に残す（仕様書 9.1）。同じ範囲の注釈は併記するが、
+    /// 話者名と辞書の用語が同じ範囲なら話者名だけを残す。名前を辞書のヒントとして外部へ送らないため（決定 D14、D33）。
+    /// </summary>
     public static IReadOnlyList<TextAnnotation> KeepLongestNonOverlapping(IEnumerable<TextAnnotation> annotations)
     {
         var kept = new List<TextAnnotation>();
@@ -19,6 +22,8 @@ public static class AnnotationSet
             }
         }
 
+        kept.RemoveAll(a => a.Kind == AnnotationKind.Glossary && kept.Any(k =>
+            k.Kind == AnnotationKind.SpeakerMention && k.Start == a.Start && k.Length == a.Length));
         return [.. kept.OrderBy(a => a.Start).ThenBy(a => a.Kind)];
     }
 }
