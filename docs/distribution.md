@@ -8,7 +8,7 @@
 
 | ファイル | 内容 |
 | --- | --- |
-| `D2ChatTranslator_<版>_x64.msix` | 自己完結型の .NET 10（win-x64）を含む MSIX。中に `LICENSE.txt`、`THIRD-PARTY-NOTICES.md`、`sbom.cdx.json` を同梱する |
+| `D2ChatTranslator_<版>_x64.msix` | 自己完結型の .NET 10（win-x64）を含む MSIX。中に `LICENSE.txt`、`CHANGELOG.md`（変更点、対応構成、未解決事項）、`THIRD-PARTY-NOTICES.md`、`sbom.cdx.json` を同梱する |
 | `D2ChatTranslator_<版>_x64.msix.sha256` | パッケージの SHA-256 |
 | `sbom.cdx.json` | SBOM（CycloneDX 1.5）。同梱する NuGet パッケージとランタイムの版、SHA-512、ライセンス |
 | `THIRD-PARTY-NOTICES.md` | 第三者のライセンス表示。リポジトリ直下にも同じものを置く |
@@ -26,6 +26,8 @@ powershell -ExecutionPolicy Bypass -File scripts/package-msix.ps1
 ```
 
 発行は `ContinuousIntegrationBuild=true` で行い、ソースのパスを埋め込まない。依存物の版は `packages.lock.json` で固定している（復元ロック）。
+
+版は `Directory.Build.props` の `<Version>`（例: `0.1.1`）だけで決め、MSIX の版はそれに `.0` を付けたもの（`0.1.1.0`）になる。`-Version` で上書きもできる。版を上げたら [CHANGELOG.md](../CHANGELOG.md) に変更点を書く。
 
 ## 署名
 
@@ -69,7 +71,7 @@ PFX ファイルで署名する場合は `-PfxPath` と `-PfxPassword` を使う
 ### 署名の確認
 
 ```powershell
-Get-AuthenticodeSignature .\artifacts\msix\D2ChatTranslator_0.1.0.0_x64.msix | Format-List Status, StatusMessage, SignerCertificate
+Get-AuthenticodeSignature .\artifacts\msix\D2ChatTranslator_0.1.1.0_x64.msix | Format-List Status, StatusMessage, SignerCertificate
 ```
 
 `Status` が `Valid` ならインストールできる。自己署名の証明書を信頼していない場合は `UnknownError`（信頼されていないルート）になる。
@@ -79,13 +81,13 @@ Get-AuthenticodeSignature .\artifacts\msix\D2ChatTranslator_0.1.0.0_x64.msix | F
 1. 配布元の SHA-256 と一致することを確かめる
 
 ```powershell
-(Get-FileHash .\D2ChatTranslator_0.1.0.0_x64.msix -Algorithm SHA256).Hash
+(Get-FileHash .\D2ChatTranslator_0.1.1.0_x64.msix -Algorithm SHA256).Hash
 ```
 
 2. MSIX をダブルクリックするか、次を実行する
 
 ```powershell
-Add-AppxPackage .\D2ChatTranslator_0.1.0.0_x64.msix
+Add-AppxPackage .\D2ChatTranslator_0.1.1.0_x64.msix
 ```
 
 3. 初回は「設定…」の「翻訳」タブで API キーを登録し直す。開発実行（`dotnet run`）とインストール版では保存先が異なり（開発実行は `%LOCALAPPDATA%\D2ChatTranslator`、インストール版はパッケージの LocalState）、設定と API キーは引き継がれない
@@ -94,10 +96,10 @@ Windows の OCR は、英語（米国）と日本語の言語機能が入って�
 
 ## 更新
 
-1. アプリを閉じる（ゲームのプレイ中に更新しない。アプリは自動更新しない）
-2. 版の大きい MSIX を同じ方法でインストールする（`-Version 0.2.0.0` のように 4 桁の版を上げて作る）
+1. アプリを閉じる（ゲームのプレイ中に更新しない。アプリは自動更新しない。起動中は更新が失敗する）
+2. 版の大きい MSIX を同じ方法でインストールする。変更点は同梱の `CHANGELOG.md` を見る
 
-Windows は新しい版を準備できてから入れ替えるため、失敗した時は元の版が残る。設定、ROI、API キー、利用者辞書は LocalState にあり、更新では消えない。
+Windows は新しい版を準備できてから入れ替えるため、失敗した時は元の版が残る。設定、ROI、API キー、利用者辞書は LocalState にあり、更新では消えない。更新の前に、戻す時に使う古い版の MSIX を残しておく（同じ証明書で署名したもの）。
 
 ## 元の版へ戻す
 
@@ -105,7 +107,47 @@ Windows は新しい版を準備できてから入れ替えるため、失敗し
 Add-AppxPackage -ForceUpdateFromAnyVersion .\D2ChatTranslator_<古い版>_x64.msix
 ```
 
-新しい版が保存した設定を古い版が読めない場合、古い版は既定値で起動し、DATA01 を表示する。設定ファイルは書き換えないため、新しい版に戻せば設定も戻る（試験 `Settings_from_a_newer_version_are_rejected_and_kept_for_recovery`）。保存時に一世代前の設定を `settings.json.bak` に残す。
+新しい版が保存した設定を古い版が読めない場合、古い版は既定値で起動し、DATA01 を表示する。設定ファイルは書き換えないため、新しい版に戻せば設定も戻る（試験 `Settings_from_a_newer_version_are_rejected_and_kept_for_recovery`）。保存時に一世代前の設定を `settings.json.bak` に残す。0.1.0 と 0.1.1 は設定の形式が同じため、どちらへ移っても設定を引き継ぐ。
+
+## 更新と元の版へ戻す確認（0.1.0 → 0.1.1 → 0.1.0 → 0.1.1）
+
+T18、A12 の確認手順。PowerShell をリポジトリのフォルダーで開いて行う。
+
+1. 今入っている版を確かめ、0.1.0.0 の MSIX（同じ証明書で署名したもの）が残っていることを確かめる
+
+```powershell
+Get-AppxPackage KANABUN.D2ChatTranslator | Select-Object Version
+Get-AuthenticodeSignature .\artifacts\msix\D2ChatTranslator_0.1.0.0_x64.msix | Select-Object Status
+```
+
+2. 0.1.1.0 を作り、自分の証明書で署名する（0.1.0.0 の MSIX は上書きされない）
+
+```powershell
+.\scripts\package-msix.ps1 -CertificateThumbprint <拇印>
+```
+
+3. アプリを閉じてから 0.1.1.0 へ更新する
+
+```powershell
+Add-AppxPackage .\artifacts\msix\D2ChatTranslator_0.1.1.0_x64.msix
+Get-AppxPackage KANABUN.D2ChatTranslator | Select-Object Version
+```
+
+4. アプリを起動し、診断欄の「版」が 0.1.1 であること、設定、ROI、API キーを入れ直さずに取得と翻訳が動くことを確かめる
+5. アプリを閉じてから 0.1.0.0 へ戻す。0.1.0 には「版」の表示がないため、版は `Get-AppxPackage` で確かめる。設定、ROI、API キーが残っていることを確かめる
+
+```powershell
+Add-AppxPackage -ForceUpdateFromAnyVersion .\artifacts\msix\D2ChatTranslator_0.1.0.0_x64.msix
+Get-AppxPackage KANABUN.D2ChatTranslator | Select-Object Version
+```
+
+6. もう一度 3 の手順で 0.1.1.0 へ更新する
+7. 起動ごとの版は診断記録に残る。次で実行（セッション）ごとの版を一覧できる
+
+```powershell
+$family = (Get-AppxPackage KANABUN.D2ChatTranslator).PackageFamilyName
+dotnet run --project tools/D2Translator.Eval -- diagnostics "$env:LOCALAPPDATA\Packages\$family\LocalState\diagnostics" --all --out update-check.md
+```
 
 ## アンインストール
 

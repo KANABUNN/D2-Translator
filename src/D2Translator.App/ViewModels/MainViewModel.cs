@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -86,6 +87,7 @@ public sealed partial class MainViewModel : ObservableObject
         HiddenText = string.Empty;
         StatsText = "まだフレームを処理していません。";
         DataFolder = location.RootDirectory;
+        VersionText = DescribeVersion(typeof(MainViewModel).Assembly);
         PackageText = location.IsPackaged ? "あり（MSIX）" : "なし（開発実行。OCR の正式サポート条件外）";
         OcrText = ocr.Recognizer is { } recognizer
             ? $"{recognizer.LanguageTag}{(recognizer.ClientLanguageTag is { } client ? $" + {client}（ゲーム表示）" : string.Empty)}、" +
@@ -185,6 +187,9 @@ public sealed partial class MainViewModel : ObservableObject
     public partial bool IsBusy { get; set; }
 
     public string DataFolder { get; }
+
+    /// <summary>アプリの版とソースのリビジョン（更新と元の版へ戻す確認、仕様書 17.3、20.3）。</summary>
+    public string VersionText { get; }
 
     public string PackageText { get; }
 
@@ -531,4 +536,12 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     private static string Ms(TimeSpan? value) => value is TimeSpan v ? $"{v.TotalMilliseconds:0} ms" : "-";
+
+    /// <summary>例: 0.1.1+a9d42fd…（リビジョンは 7 桁に縮める）→ 0.1.1（a9d42fd）。</summary>
+    private static string DescribeVersion(Assembly assembly)
+    {
+        string version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "-";
+        string[] parts = version.Split('+', 2);
+        return parts.Length == 2 ? $"{parts[0]}（{parts[1][..Math.Min(7, parts[1].Length)]}）" : version;
+    }
 }

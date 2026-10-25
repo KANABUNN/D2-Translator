@@ -9,6 +9,7 @@ Destiny 2 専用のリアルタイム双方向チャット翻訳ソフト（Wind
 ## 使い方と記録
 
 - [操作説明](docs/user-guide.md)
+- [変更履歴](CHANGELOG.md)
 - [残存制限一覧](docs/limitations.md)
 - [配布、署名、更新](docs/distribution.md)
 - [日本語仕様書 v1.1](docs/D2_Chat_Translator_Specification_v1.1_ja.md)

@@ -1,6 +1,6 @@
 # 操作説明
 
-D2 Chat Translator 0.1.0（Phase 5）の使い方。仕様書 22 章 Phase 5 の「操作説明」。制限は [残存制限一覧](limitations.md)、インストールと更新は [配布、署名、更新](distribution.md) を参照。
+D2 Chat Translator 0.1.1（Phase 5）の使い方。版ごとの変更点は [変更履歴](../CHANGELOG.md)。仕様書 22 章 Phase 5 の「操作説明」。制限は [残存制限一覧](limitations.md)、インストールと更新は [配布、署名、更新](distribution.md) を参照。
 
 ## できること
 

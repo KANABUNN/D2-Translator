@@ -4,7 +4,7 @@
 
 .DESCRIPTION
   1. dotnet publish (self-contained, win-x64, deterministic CI build) into artifacts\msix\layout
-  2. Adds LICENSE, THIRD-PARTY-NOTICES.md and sbom.cdx.json (scripts\generate-sbom.ps1) to the layout
+  2. Adds LICENSE, CHANGELOG.md, THIRD-PARTY-NOTICES.md and sbom.cdx.json (scripts\generate-sbom.ps1) to the layout
   3. Copies packaging\AppxManifest.xml and generates placeholder logos
   4. makeappx pack -> artifacts\msix\D2ChatTranslator_<version>_x64.msix
   5. Signs the package when -CertificateThumbprint or -PfxPath is given
@@ -32,8 +32,9 @@
 #>
 param(
     [string] $Configuration = "Release",
+    # Four-part package version. Defaults to <Version> in Directory.Build.props plus ".0".
     [ValidatePattern('^\d+\.\d+\.\d+\.\d+$')]
-    [string] $Version = "0.1.0.0",
+    [string] $Version,
     # Must match the Subject of the signing certificate.
     [string] $Publisher = "CN=D2ChatTranslator Dev",
     # A code signing certificate in Cert:\CurrentUser\My.
@@ -49,6 +50,12 @@ $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
+if (-not $Version) {
+    [xml] $props = Get-Content (Join-Path $root "Directory.Build.props") -Raw -Encoding UTF8
+    $declared = @($props.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ }) | Select-Object -First 1
+    if ($declared -notmatch '^\d+\.\d+\.\d+$') { throw "Directory.Build.props has no three-part <Version>." }
+    $Version = "$declared.0"
+}
 $outDir = Join-Path $root "artifacts\msix"
 $layout = Join-Path $outDir "layout"
 $assets = Join-Path $layout "Assets"
@@ -122,6 +129,8 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed." }
 
 # License, third-party notices and SBOM ship inside the package (specification 17.3)
 Copy-Item (Join-Path $root "LICENSE") (Join-Path $layout "LICENSE.txt")
+# Changes, supported configuration and open issues for each version (specification 17.3)
+Copy-Item (Join-Path $root "CHANGELOG.md") (Join-Path $layout "CHANGELOG.md")
 & (Join-Path $PSScriptRoot "generate-sbom.ps1") -PublishDir $layout -OutDir $layout -AppVersion $plainVersion
 Copy-Item (Join-Path $layout "THIRD-PARTY-NOTICES.md"), (Join-Path $layout "sbom.cdx.json") $outDir -Force
 
