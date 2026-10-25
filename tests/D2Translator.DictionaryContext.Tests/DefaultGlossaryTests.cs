@@ -94,6 +94,42 @@ public class DefaultGlossaryTests
     }
 
     [Fact]
+    public void Prefiltered_matching_gives_the_same_annotations_as_matching_every_term()
+    {
+        // 索引で照合語を絞っても、全ての照合語を照合した場合と結果（位置、長さ、語義、注記、並び）が変わらないこと
+        IReadOnlyList<GlossaryEntry> entries = Loaded.Document!.Entries;
+        var everyTerm = new GlossaryMatcher(entries, "test", prefilter: false);
+        var prefiltered = new GlossaryMatcher(entries, "test");
+        string[] corpus =
+        [
+            .. entries.Where((_, i) => i % 13 == 0).SelectMany(e => e.Examples),
+            .. entries.Where((_, i) => i % 9 == 0).Select(e => $"ok {e.Source.Replace(GlossaryLoader.NumberPlaceholder, "2", StringComparison.Ordinal)}, now"),
+            "LF3M VoG KWTD no mic required", "send me the address", "who has the well of radiance", "ADS DPS GL FR OP NM Discord",
+            "Izanagi's Burden with Bait and Switch", "I'll do DPS. LF12M!", "", "   ", "日本語だけの文",
+        ];
+
+        int matched = 0;
+        var differences = new List<string>();
+        foreach (string text in corpus)
+        {
+            string expected = Describe(everyTerm.Find(text));
+            string actual = Describe(prefiltered.Find(text));
+            matched += expected.Length == 0 ? 0 : 1;
+            if (expected != actual)
+            {
+                differences.Add($"[{text}] expected {expected} / actual {actual}");
+            }
+        }
+
+        Assert.Empty(differences);
+        // 照合が実際に起きる文で比べたこと
+        Assert.True(matched > 1000, $"matched texts: {matched} of {corpus.Length}");
+    }
+
+    private static string Describe(IReadOnlyList<TextAnnotation> annotations) =>
+        string.Join(" | ", annotations.Select(a => $"{a.Start}:{a.Length}:{a.ReferenceId}:{a.Note}"));
+
+    [Fact]
     public void Official_names_are_matched_on_word_boundaries()
     {
         TextAnnotation found = Assert.Single(Matcher.Find("who has the well of radiance"));

@@ -12,6 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- 索引による絞り込みと全件照合の結果の一致を試験する -->
+    <InternalsVisibleTo Include="D2Translator.DictionaryContext.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\D2Translator.Domain\D2Translator.Domain.csproj" />
     <ProjectReference Include="..\D2Translator.TextTracking\D2Translator.TextTracking.csproj" />
   </ItemGroup>
